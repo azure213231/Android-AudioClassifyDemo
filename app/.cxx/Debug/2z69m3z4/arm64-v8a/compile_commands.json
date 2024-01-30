@@ -1,0 +1,7 @@
+[
+{
+  "directory": "D:/Code/SDKDemo/NCNNDemo/app/.cxx/Debug/2z69m3z4/arm64-v8a",
+  "command": "C:\\Users\\HuangMinglun\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/HuangMinglun/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dncnndemo_EXPORTS -isystem D:/Code/SDKDemo/NCNNDemo/app/src/main/cpp/ncnn-20230816-android-vulkan/arm64-v8a/include/ncnn -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -fno-rtti -fno-exceptions -pthread -o CMakeFiles\\ncnndemo.dir\\native-lib.cpp.o -c D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\native-lib.cpp",
+  "file": "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\native-lib.cpp"
+}
+]

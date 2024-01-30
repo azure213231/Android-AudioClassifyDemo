@@ -1,0 +1,37 @@
+{
+  "buildFiles": [
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\jni\\CMakeLists.txt",
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\jni\\ncnn-20230816-android-vulkan\\x86\\lib\\cmake\\glslang\\glslang-config-version.cmake",
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\jni\\ncnn-20230816-android-vulkan\\x86\\lib\\cmake\\glslang\\glslang-config.cmake",
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\jni\\ncnn-20230816-android-vulkan\\x86\\lib\\cmake\\glslang\\glslang-targets-release.cmake",
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\jni\\ncnn-20230816-android-vulkan\\x86\\lib\\cmake\\glslang\\glslang-targets.cmake",
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\jni\\ncnn-20230816-android-vulkan\\x86\\lib\\cmake\\ncnn\\ncnn-release.cmake",
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\jni\\ncnn-20230816-android-vulkan\\x86\\lib\\cmake\\ncnn\\ncnn.cmake",
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\jni\\ncnn-20230816-android-vulkan\\x86\\lib\\cmake\\ncnn\\ncnnConfig.cmake"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\HuangMinglun\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "D:\\Code\\SDKDemo\\NCNNDemo\\app\\.cxx\\Debug\\1b6i2e2h\\x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\HuangMinglun\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "D:\\Code\\SDKDemo\\NCNNDemo\\app\\.cxx\\Debug\\1b6i2e2h\\x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "ncnndemo::@6890427a1f51a3e7e1df": {
+      "artifactName": "ncnndemo",
+      "abi": "x86",
+      "output": "D:\\Code\\SDKDemo\\NCNNDemo\\app\\build\\intermediates\\cxx\\Debug\\1b6i2e2h\\obj\\x86\\libncnndemo.so",
+      "runtimeFiles": [
+        "C:\\Users\\HuangMinglun\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\24\\liblog.so",
+        "C:\\Users\\HuangMinglun\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\24\\libvulkan.so"
+      ]
+    }
+  }
+}

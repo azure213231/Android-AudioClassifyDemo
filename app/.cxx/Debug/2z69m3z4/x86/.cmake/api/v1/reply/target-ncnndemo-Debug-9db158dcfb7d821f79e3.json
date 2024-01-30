@@ -1,0 +1,204 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "D:/Code/SDKDemo/NCNNDemo/app/build/intermediates/cxx/Debug/2z69m3z4/obj/x86/libncnndemo.so"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_link_libraries"
+		],
+		"files" : 
+		[
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 20,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 46,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC"
+				},
+				{
+					"backtrace" : 2,
+					"fragment" : "-fno-rtti"
+				},
+				{
+					"backtrace" : 2,
+					"fragment" : "-fno-exceptions"
+				},
+				{
+					"backtrace" : 2,
+					"fragment" : "-pthread"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"define" : "ncnndemo_EXPORTS"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 2,
+					"isSystem" : true,
+					"path" : "D:/Code/SDKDemo/NCNNDemo/app/src/main/cpp/ncnn-20230816-android-vulkan/x86/include/ncnn"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0
+			],
+			"sysroot" : 
+			{
+				"path" : "C:/Users/HuangMinglun/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
+			}
+		}
+	],
+	"id" : "ncnndemo::@6890427a1f51a3e7e1df",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--fatal-warnings -Wl,--gc-sections -Wl,--no-undefined -Qunused-arguments",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\ncnn-20230816-android-vulkan\\x86\\lib\\libncnn.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "-ljnigraphics",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "C:\\Users\\HuangMinglun\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\24\\liblog.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-fopenmp",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-static-openmp",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-Wl,-wrap,__kmp_affinity_determine_capable",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "C:\\Users\\HuangMinglun\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\24\\libvulkan.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\ncnn-20230816-android-vulkan\\x86\\lib\\libglslang.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\ncnn-20230816-android-vulkan\\x86\\lib\\libSPIRV.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\ncnn-20230816-android-vulkan\\x86\\lib\\libMachineIndependent.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\ncnn-20230816-android-vulkan\\x86\\lib\\libOGLCompiler.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\ncnn-20230816-android-vulkan\\x86\\lib\\libOSDependent.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-pthread",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "D:\\Code\\SDKDemo\\NCNNDemo\\app\\src\\main\\cpp\\ncnn-20230816-android-vulkan\\x86\\lib\\libGenericCodeGen.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-landroid",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "-ljnigraphics",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-llog",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-latomic -lm",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX",
+		"sysroot" : 
+		{
+			"path" : "C:/Users/HuangMinglun/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
+		}
+	},
+	"name" : "ncnndemo",
+	"nameOnDisk" : "libncnndemo.so",
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "native-lib.cpp",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "SHARED_LIBRARY"
+}

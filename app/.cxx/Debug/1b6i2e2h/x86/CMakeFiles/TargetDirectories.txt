@@ -1,0 +1,3 @@
+D:/Code/SDKDemo/NCNNDemo/app/.cxx/Debug/1b6i2e2h/x86/CMakeFiles/ncnndemo.dir
+D:/Code/SDKDemo/NCNNDemo/app/.cxx/Debug/1b6i2e2h/x86/CMakeFiles/edit_cache.dir
+D:/Code/SDKDemo/NCNNDemo/app/.cxx/Debug/1b6i2e2h/x86/CMakeFiles/rebuild_cache.dir
