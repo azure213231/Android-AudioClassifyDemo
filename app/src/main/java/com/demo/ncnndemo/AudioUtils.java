@@ -1,78 +1,124 @@
 package com.demo.ncnndemo;
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.MediaPlayer;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class AudioUtils {
     private static final String TAG = "AudioUtils";
 
-    public static short[] convertAudioFileToShortArray(File audioFile, int frameCount) {
-        short[] audioData = new short[frameCount];
-
+    /**
+     * 提取的音频方法与py中一致
+     * */
+    public static double[] loadAudioAsDoubleArray(Context context, String filename) {
+        AssetFileDescriptor assetFileDescriptor = null;
         try {
-            FileInputStream fileInputStream = new FileInputStream(audioFile);
-            byte[] fileData = new byte[(int) audioFile.length()];
-            fileInputStream.read(fileData);
-            fileInputStream.close();
+            MediaPlayer mediaPlayer = new MediaPlayer();
+            assetFileDescriptor = context.getAssets().openFd(filename);
+            mediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(), assetFileDescriptor.getStartOffset(), assetFileDescriptor.getLength());
 
-            int channelCount = AudioFormat.CHANNEL_OUT_MONO;
-            int encoding = AudioFormat.ENCODING_PCM_32BIT;
-            int bytesPerSample = getBytesPerSample(encoding);
+            InputStream inputStream = context.getAssets().open(filename);
+            byte[] audioData = new byte[inputStream.available()];
+            inputStream.read(audioData);
+            inputStream.close();
 
-            int frameSize = frameCount * channelCount * bytesPerSample;
-            int bufferSize = AudioTrack.getMinBufferSize(AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC), channelCount, encoding);
-            int bufferCount = frameSize / bufferSize;
+            // 设置音频属性
+            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build());
 
-            AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC),
-                    channelCount, encoding, bufferSize, AudioTrack.MODE_STATIC);
+            // 准备 MediaPlayer
+            mediaPlayer.prepare();
 
-            audioTrack.write(fileData, 0, frameSize);
+            // 获取音频信息
+            int duration = mediaPlayer.getDuration(); // 获取音频时长（毫秒）
+            //采样率
+            Integer sampleRate = ByteUtils.getIntFromByte(audioData, 24, 4); // 获取采样率
+            int frameCount = duration * sampleRate / 1000; // 计算帧数
 
-            audioTrack.setPlaybackHeadPosition(0); // 将播放头位置设置为音频开头
+            // 设置音频格式
+            //通道数
+            Integer channelCount = ByteUtils.getIntFromByte(audioData, 22, 2);    // 声道数
+            //位宽，每个采样点的bit数
+            Integer sampleSizeInBits = ByteUtils.getIntFromByte(audioData, 34, 2); // 采样位数
 
-            audioTrack.setLoopPoints(0, bufferCount, -1); // 设置循环播放
+            // 计算每帧的字节数
+            int frameSize = (sampleSizeInBits / 8) * channelCount;
 
-//            audioTrack.play(); // 开始播放
+            // 将音频数据分割到每帧
+            // 将音频数据转换为浮点数数组
+            byte[] audioPcmData = new byte[frameSize * frameCount];
+            double[] floatArray = new double[frameCount];
+            // 计算实际需要复制的字节数
+            int remainingBytes = audioData.length - 44; // 假设 44 是 WAV 文件头的大小
+            int copyBytes = Math.min(remainingBytes, frameSize * frameCount);
+            // 进行复制
+            System.arraycopy(audioData, 44, audioPcmData, 0, copyBytes);
 
-            int totalBytesRead = 0;
-            int totalFramesRead = 0;
+            //编码格式0x01表示pcm
+            Integer audioFormat = ByteUtils.getIntFromByte(audioData, 20, 2);
+            //数据长度，单位字节
+            Integer dataSize = ByteUtils.getIntFromByte(audioData, 40, 4);
 
-            while (totalFramesRead < frameCount) {
-                int availableFrames = audioTrack.getPlaybackHeadPosition() / bytesPerSample / channelCount;
-                int framesToRead = Math.min(frameCount - totalFramesRead, availableFrames);
-                int bytesToRead = framesToRead * bytesPerSample * channelCount;
-
-//                int bytesRead = audioTrack.read(fileData, totalBytesRead, bytesToRead);
-//                if (bytesRead == AudioTrack.ERROR_INVALID_OPERATION || bytesRead == AudioTrack.ERROR_BAD_VALUE) {
-//                    Log.e(TAG, "Error reading audio data");
-//                    break;
-//                }
-//
-//                totalBytesRead += bytesRead;
-                totalFramesRead += framesToRead;
+            for (int i = 0; i < frameCount; i++) {
+                float value = bytesToFloat(audioPcmData, i * frameSize);
+                floatArray[i] = value;
             }
 
-//            audioTrack.stop(); // 停止播放
-            audioTrack.release(); // 释放资源
-
-            // 将字节数组转换为short数组
-            int shortArrayLength = totalBytesRead / bytesPerSample;
-            for (int i = 0; i < shortArrayLength; i++) {
-                short sample = byteArrayToShort(fileData[i * bytesPerSample], fileData[i * bytesPerSample + 1], encoding);
-                audioData[i] = sample;
-            }
-
+            //归一化
+            normalize(floatArray,-20.0,300.0);
+            return floatArray;
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+    private static void normalize(double[] audioData, double targetDb, double maxGainDb) {
+        if (Double.isInfinite(rmsDb(audioData))) return;
+
+        double gain = targetDb - rmsDb(audioData);
+
+        if (gain > maxGainDb) {
+            throw new IllegalArgumentException(String.format(
+                    "Cannot normalize segment to %f dB because the potential gain exceeds maxGainDb (%f dB)",
+                    targetDb, maxGainDb));
         }
 
-        return audioData;
+        gainDb(audioData,Math.min(maxGainDb, targetDb - rmsDb(audioData)));
+    }
+
+    private static void gainDb(double[] samples, double gain) {
+        double linearGain = Math.pow(10, gain / 20.0);
+        for (int i = 0; i < samples.length; i++) {
+            samples[i] *= linearGain;
+        }
+    }
+
+    private static double rmsDb(double[] samples) {
+        double sum = 0;
+        for (double sample : samples) {
+            sum += sample * sample;
+        }
+        double rms = Math.sqrt(sum / samples.length);
+        return 20.0 * Math.log10(rms);
+    }
+
+    private static float bytesToFloat(byte[] bytes, int offset) {
+        int value = 0;
+        for (int i = 0; i < 4; i++) {
+            value |= (bytes[offset + i] & 0xFF) << (i * 8);
+        }
+        return Float.intBitsToFloat(value);
     }
 
     private static int getBytesPerSample(int encoding) {
