@@ -1,8 +1,0 @@
-D:\Code\SDKDemo\NCNNDemo\app\src\main\cpp\CMakeLists.txt
-D:\Code\SDKDemo\NCNNDemo\app\src\main\cpp\ncnn-20230816-android-vulkan\x86\lib\cmake\glslang\glslang-config-version.cmake
-D:\Code\SDKDemo\NCNNDemo\app\src\main\cpp\ncnn-20230816-android-vulkan\x86\lib\cmake\glslang\glslang-config.cmake
-D:\Code\SDKDemo\NCNNDemo\app\src\main\cpp\ncnn-20230816-android-vulkan\x86\lib\cmake\glslang\glslang-targets-release.cmake
-D:\Code\SDKDemo\NCNNDemo\app\src\main\cpp\ncnn-20230816-android-vulkan\x86\lib\cmake\glslang\glslang-targets.cmake
-D:\Code\SDKDemo\NCNNDemo\app\src\main\cpp\ncnn-20230816-android-vulkan\x86\lib\cmake\ncnn\ncnn-release.cmake
-D:\Code\SDKDemo\NCNNDemo\app\src\main\cpp\ncnn-20230816-android-vulkan\x86\lib\cmake\ncnn\ncnn.cmake
-D:\Code\SDKDemo\NCNNDemo\app\src\main\cpp\ncnn-20230816-android-vulkan\x86\lib\cmake\ncnn\ncnnConfig.cmake
