@@ -13,7 +13,10 @@
         android:theme="@style/Theme.NCNNDemo"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity2"
+            android:name=".RecordAudioClassifyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AssetsAudioClassify"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
