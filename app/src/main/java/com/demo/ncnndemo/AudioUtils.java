@@ -2,17 +2,27 @@ package com.demo.ncnndemo;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 
 public class AudioUtils {
     private static final String TAG = "AudioUtils";
@@ -134,18 +144,127 @@ public class AudioUtils {
         }
     }
 
-    private static short byteArrayToShort(byte byte1, byte byte2, int encoding) {
-        switch (encoding) {
-            case AudioFormat.ENCODING_PCM_8BIT:
-                return (short) (byte1 << 8);
-            case AudioFormat.ENCODING_PCM_16BIT:
-                return (short) ((byte2 << 8) | (byte1 & 0xFF));
-            case AudioFormat.ENCODING_PCM_FLOAT:
-                // 根据需要实现浮点数转换为short的逻辑
-                // 这里只是简单地将浮点数转换为16位整数
-                return (short) (byte2 << 8);
-            default:
-                return (short) ((byte2 << 8) | (byte1 & 0xFF)); // 默认为16位PCM
+    /**
+     * 保存音频
+     * */
+    public static void saveDoubleArrayAsWav(double[] pcmData, String outputFilePath) {
+        int SAMPLE_RATE = 16000;
+        int BITS_PER_SAMPLE = 32;
+        int CHANNELS = 1;
+        // 将double数组缩放到32位深度范围内
+        float scaleFactor = (float) Math.pow(2, BITS_PER_SAMPLE - 1) - 1;
+        float[] scaledData = new float[pcmData.length];
+        for (int i = 0; i < pcmData.length; i++) {
+            scaledData[i] = (float) (pcmData[i] * scaleFactor);
+        }
+
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(scaledData.length * (BITS_PER_SAMPLE / 8)).order(ByteOrder.LITTLE_ENDIAN);
+        for (float value : scaledData) {
+            byteBuffer.putInt((int) value);
+        }
+
+        try {
+            File file = new File(outputFilePath);
+            FileOutputStream fos = new FileOutputStream(file);
+
+            // 添加WAV文件头
+            fos.write("RIFF".getBytes());
+            fos.write(intToBytes(36 + byteBuffer.capacity(), 4));  // Sub-chunk 1 size
+            fos.write("WAVE".getBytes());
+            fos.write("fmt ".getBytes());
+            fos.write(intToBytes(16, 4));  // Sub-chunk 1 size
+            fos.write(shortToBytes((short) 1, 2));  // AudioFormat (PCM)
+            fos.write(shortToBytes((short) CHANNELS, 2));  // Number of channels
+            fos.write(intToBytes(SAMPLE_RATE, 4));  // Sample rate
+            fos.write(intToBytes(SAMPLE_RATE * CHANNELS * (BITS_PER_SAMPLE / 8), 4));  // Byte rate
+            fos.write(shortToBytes((short) (CHANNELS * (BITS_PER_SAMPLE / 8)), 2));  // Block align
+            fos.write(shortToBytes((short) BITS_PER_SAMPLE, 2));  // Bits per sample
+
+            fos.write("data".getBytes());
+            fos.write(intToBytes(byteBuffer.capacity(), 4));  // Sub-chunk 2 size
+            fos.write(byteBuffer.array());
+
+            fos.close();
+            System.out.println("WAV文件保存成功：" + file.getAbsolutePath());
+        } catch (Exception e) {
+            System.out.println("WAV文件保存失败");
+            e.printStackTrace();
+        }
+    }
+
+    private static byte[] intToBytes(int value, int size) {
+        byte[] bytes = new byte[size];
+        for (int i = 0; i < size; i++) {
+            bytes[i] = (byte) (value >>> (i * 8));
+        }
+        return bytes;
+    }
+
+    private static byte[] shortToBytes(short value, int size) {
+        byte[] bytes = new byte[size];
+        for (int i = 0; i < size; i++) {
+            bytes[i] = (byte) (value >>> (i * 8));
+        }
+        return bytes;
+    }
+
+    public static short[] padShortArray(short[] originalArray, int targetLength) {
+        int originalLength = originalArray.length;
+        int paddingLength = targetLength - (originalLength % targetLength);
+        int newLength = originalLength + paddingLength;
+
+        short[] paddedArray = Arrays.copyOf(originalArray, newLength);
+        // 此时 paddedArray 的长度为 targetLength 的倍数，且原始数组的元素被复制到前面
+
+        // 如果需要在末尾填充0，可以取消下一行的注释
+         Arrays.fill(paddedArray, originalLength, newLength, (short) 0);
+
+        return paddedArray;
+    }
+
+    public static class WavHeader {
+        private int numChannels;
+        private int sampleRate;
+        private int bitsPerSample;
+        private int dataSize;
+        private int bytesPerSample;
+        private int headerSize;
+
+        public WavHeader(int numChannels, int sampleRate, int bitsPerSample, int dataSize, int bytesPerSample, int headerSize) {
+            this.numChannels = numChannels;
+            this.sampleRate = sampleRate;
+            this.bitsPerSample = bitsPerSample;
+            this.dataSize = dataSize;
+            this.bytesPerSample = bytesPerSample;
+            this.headerSize = headerSize;
+        }
+
+        public int getHeaderSize() {
+            return headerSize;
+        }
+
+        public void setHeaderSize(int headerSize) {
+            this.headerSize = headerSize;
+        }
+
+        public int getNumChannels() {
+            return numChannels;
+        }
+
+        public int getSampleRate() {
+            return sampleRate;
+        }
+
+        public int getBitsPerSample() {
+            return bitsPerSample;
+        }
+
+        public int getDataSize() {
+            return dataSize;
+        }
+
+        public int getBytesPerSample() {
+            return bytesPerSample;
         }
     }
 }

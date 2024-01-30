@@ -17,7 +17,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.pytorch.IValue;
 import org.pytorch.Module;
@@ -49,9 +51,39 @@ public class MainActivity extends AppCompatActivity {
         try {
             Module module = Module.load(assetFilePath(this, "fbank-model.pt"));
 
-            double[] audioAsFloatArray = AudioUtils.loadAudioAsDoubleArray(this, "audio/SnoreTest-00019.wav");
 
-            double[][][] feature = FilterBankProcessor.getFeature(audioAsFloatArray);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+
+            String fileName = "dogTest-0001.wav";
+            double[] audioAsFloatArray = AudioUtils.loadAudioAsDoubleArray( this,"audio/" + fileName);
+
+
+            WebRTCAudioUtils webRTCAudioUtils = new WebRTCAudioUtils();
+            long nsxId = webRTCAudioUtils.nsxCreate();
+            webRTCAudioUtils.nsxInit(nsxId,16000);
+            webRTCAudioUtils.nsxSetPolicy(nsxId,2);
+
+            Integer shortSize = 160;
+            short[] shortArray = ByteUtils.convertDoubleArrayToShortArray(audioAsFloatArray);
+            short[] padShortArray = AudioUtils.padShortArray(shortArray, shortSize);
+
+            double[] padDoubleArray = ByteUtils.convertShortArrayToDoubleArray(shortArray);
+            String savePath1 = getExternalFilesDir(null).getAbsolutePath() + File.separator + "recordPCMVoice" + File.separator + sdf.format(new Date(System.currentTimeMillis())) + "pad" + fileName;
+            AudioUtils.saveDoubleArrayAsWav(audioAsFloatArray,savePath1);
+
+            short[][] splitShortArray = ByteUtils.splitShortArray(padShortArray, shortSize);
+            short[] nsxShortArray = new short[padShortArray.length];
+
+            for (int i = 0; i < splitShortArray.length; i++){
+                short[] outNsxData = new short[shortSize];
+                webRTCAudioUtils.nsxProcess(nsxId,splitShortArray[i],1,outNsxData);
+                System.arraycopy(outNsxData,0,nsxShortArray,i*shortSize,shortSize);
+            }
+            double[] nsxDoubleArray = ByteUtils.convertShortArrayToDoubleArray(nsxShortArray);
+            String savePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "recordPCMVoice" + File.separator + sdf.format(new Date(System.currentTimeMillis())) + fileName;
+            AudioUtils.saveDoubleArrayAsWav(nsxDoubleArray,savePath);
+
+            double[][][] feature = FilterBankProcessor.getFeature(nsxDoubleArray);
             // 将三维的 double 转换为 一维float
             float[] featureFloat = ByteUtils.convertToFloatArray(feature);
 

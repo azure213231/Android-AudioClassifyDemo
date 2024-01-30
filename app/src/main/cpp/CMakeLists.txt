@@ -17,6 +17,10 @@ project("ncnndemo")
 set(ncnn_DIR ${CMAKE_SOURCE_DIR}/ncnn-20230816-android-vulkan/${ANDROID_ABI}/lib/cmake/ncnn)
 find_package(ncnn REQUIRED)
 
+set(libs_DIR libs/${ANDROID_ABI})
+include_directories(${libs_include_DIR})
+link_directories(${libs_DIR})
+
 add_library( # Sets the name of the library.
         ncnndemo
 
@@ -25,6 +29,53 @@ add_library( # Sets the name of the library.
 
         # Provides a relative path to your source file(s).
         native-lib.cpp)
+
+add_library( # Sets the name of the library.
+        webrtc-lib
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        common_audio/ring_buffer.c
+        common_audio/spl_sqrt_floor.c
+        common_audio/delay_estimator.cc
+        common_audio/delay_estimator_wrapper.cc
+        common_audio/dot_product_with_scale.cc
+        common_audio/real_fft.c
+        common_audio/fft4g.c
+        common_audio/complex_fft.c
+        common_audio/complex_bit_reverse.c
+        common_audio/vector_scaling_operations.c
+        common_audio/energy.c
+        common_audio/sqrt_of_one_minus_x_squared.c
+        common_audio/division_operations.c
+        common_audio/min_max_operations.c
+        common_audio/spl_sqrt.c
+        common_audio/resample_by_2.c
+        common_audio/copy_set_operations.c
+        common_audio/get_scaling_square.c
+        common_audio/randomization_functions.c
+
+        aecm/aecm_core.cc
+        aecm/aecm_core_c.cc
+        aecm/echo_control_mobile.cc
+
+        ns/noise_suppression.c
+        ns/noise_suppression_x.c
+        ns/ns_core.c
+        ns/nsx_core.c
+        ns/nsx_core_c.c
+
+        agc/analog_agc.c
+        agc/digital_agc.c
+
+        webrtc-lib.cpp)
+
+include_directories(aecm/)
+include_directories(ns/)
+include_directories(agc/)
+include_directories(common_audio/)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
