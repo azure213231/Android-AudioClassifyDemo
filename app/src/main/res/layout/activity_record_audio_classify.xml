@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:text="分析结果"/>
+            android:text="分析结果(只保存识别结果大于0.8的数据)"/>
         <TextView
             android:id="@+id/classify_result"
             android:layout_width="wrap_content"
@@ -32,11 +32,11 @@
 
     <LinearLayout
         android:id="@+id/record_linear_layout"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/save_path_tip"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="20dp"
         android:gravity="center">
         <TextView
             android:id="@+id/start_record"
@@ -56,9 +56,20 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textColor="@color/black"
-            android:background="#4F000000"
+            android:background="#4FFF0000"
             android:paddingHorizontal="20dp"
             android:paddingVertical="10dp"
             android:text="结束录音"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/save_path_tip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:textSize="14sp"
+        android:paddingHorizontal="20dp"
+        android:text="音频文件保存在：Android/data/com.demo.ncnndemo/files/audioClassify/ 目录下"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

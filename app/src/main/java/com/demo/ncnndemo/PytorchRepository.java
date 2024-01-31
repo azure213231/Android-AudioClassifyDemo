@@ -39,7 +39,7 @@ public class PytorchRepository {
         }
     }
 
-    public String audioClassify(double[] audioAsFloatArray) throws Exception{
+    public AudioClassifyResult audioClassify(Context context,double[] audioAsFloatArray) throws Exception{
         try {
             //初始化webrtc降噪
             WebRTCAudioUtils webRTCAudioUtils = new WebRTCAudioUtils();
@@ -83,10 +83,10 @@ public class PytorchRepository {
             long[] outputShape = outputTensor.shape();
 
 
-            String text = "";
+            AudioClassifyResult audioClassifyResult = new AudioClassifyResult();
             //判断输出张量形状和对应的类型长度是否一致
             if (SoundClassed.CLASSES.length != outputShape[1]){
-                text = "SoundClassed.length error";
+                audioClassifyResult.setLabel("error");
             } else {
                 // 获取整个输出张量的数据
                 float[] outputData = outputTensor.getDataAsFloatArray();
@@ -103,12 +103,17 @@ public class PytorchRepository {
 //                    text = text + SoundClassed.CLASSES[i] + ": " + score + "\n";
                     if (softmaxProbabilities[i] > maxScore) {
                         maxScore = softmaxProbabilities[i];
-                        text = SoundClassed.CLASSES[i] + ": " + maxScore;
+                        audioClassifyResult.setScore(maxScore);
+                        audioClassifyResult.setLabel(SoundClassed.CLASSES[i]);
                     }
                 }
             }
 
-            return text;
+            if (audioClassifyResult.getScore() > 0.8){
+                AudioUtils.saveAudioClassifyNSXWav(context,audioClassifyResult.getLabel(),nsxDoubleArray);
+            }
+
+            return audioClassifyResult;
         }catch (Exception e){
             Log.e("TAG", "AudioClassify: "+e.getMessage() );
             throw new Exception(e);
@@ -137,5 +142,26 @@ public class PytorchRepository {
         }
 
         return softmax;
+    }
+
+    public class AudioClassifyResult{
+        private String label;
+        private float score;
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(String label) {
+            this.label = label;
+        }
+
+        public float getScore() {
+            return score;
+        }
+
+        public void setScore(float score) {
+            this.score = score;
+        }
     }
 }

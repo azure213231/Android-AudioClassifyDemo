@@ -152,6 +152,14 @@ public class AudioUtils {
         AudioUtils.saveDoubleArrayAsWav(audioData,savePath);
     }
 
+    public static void saveAudioClassifyNSXWav(Context context,String classify,double[] audioData){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+        String savePath = context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "audioClassifyNSX" + File.separator
+                + classify + File.separator + sdf.format(new Date(System.currentTimeMillis())) + ".wav";
+        Log.e("TAG", "run: "+savePath );
+        AudioUtils.saveDoubleArrayAsWav(audioData,savePath);
+    }
+
     /**
      * 保存音频
      * */

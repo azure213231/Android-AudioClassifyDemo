@@ -2,17 +2,22 @@ package com.demo.ncnndemo;
 
 import static com.demo.ncnndemo.AssetsAudioClassify.assetFilePath;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 
@@ -36,10 +41,12 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_32BIT;
     private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
     private static final int RECORD_AUDIO_PERMISSION_CODE = 1;
+    private static final int OPEN_DIRECTORY_REQUEST_CODE = 3;
     private ArrayList<byte[]> recordedDataList = new ArrayList<>();
     //上一次音频分析时间
     private long lastRecordTimeStamp;
     private boolean isAudioClassify = false;
+    private ActivityResultLauncher<Intent> directoryPickerLauncher;
 
 
     @Override
@@ -177,14 +184,12 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
                             public void run() {
                                 try {
                                     isAudioClassify = true;
-                                    String classify = PytorchRepository.getInstance().audioClassify(doubles);
-                                    binding.classifyResult.setText(classify);
+                                    PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
+                                    binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
 
-//                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
-//                                    String savePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "audioClassify" + File.separator
-//                                            + classify.substring(0,classify.indexOf(":")) + File.separator + sdf.format(new Date(System.currentTimeMillis())) + ".wav";
-//                                    Log.e("TAG", "run: "+savePath );
-                                    AudioUtils.saveAudioClassifyWav(getApplicationContext(),classify.substring(0,classify.indexOf(":")),doubles);
+                                    if (audioClassifyResult.getScore() > 0.8){
+                                        AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
+                                    }
                                 } catch (Exception e) {
                                     ToastUtil.showToast(getApplicationContext(),"分析失败: " + e.getMessage());
                                 }
