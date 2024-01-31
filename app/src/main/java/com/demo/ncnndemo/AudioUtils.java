@@ -144,6 +144,14 @@ public class AudioUtils {
         }
     }
 
+    public static void saveAudioClassifyWav(Context context,String classify,double[] audioData){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+        String savePath = context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "audioClassify" + File.separator
+                + classify + File.separator + sdf.format(new Date(System.currentTimeMillis())) + ".wav";
+        Log.e("TAG", "run: "+savePath );
+        AudioUtils.saveDoubleArrayAsWav(audioData,savePath);
+    }
+
     /**
      * 保存音频
      * */
@@ -165,6 +173,7 @@ public class AudioUtils {
 
         try {
             File file = new File(outputFilePath);
+            createFileRecursively(file);
             FileOutputStream fos = new FileOutputStream(file);
 
             // 添加WAV文件头
@@ -185,10 +194,36 @@ public class AudioUtils {
             fos.write(byteBuffer.array());
 
             fos.close();
-            System.out.println("WAV文件保存成功：" + file.getAbsolutePath());
+            System.out.println();
+            Log.i(TAG, "saveDoubleArrayAsWav: WAV文件保存成功：" + file.getAbsolutePath());
         } catch (Exception e) {
-            System.out.println("WAV文件保存失败");
+            Log.e(TAG, "saveDoubleArrayAsWav: WAV文件保存失败: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private static void createFileRecursively(File file) throws IOException {
+        // 获取文件的父目录
+        File parentDirectory = file.getParentFile();
+
+        // 判断父目录是否存在，如果不存在则递归创建
+        if (!parentDirectory.exists()) {
+            if (parentDirectory.mkdirs()) {
+                System.out.println("父目录创建成功: " + parentDirectory.getAbsolutePath());
+            } else {
+                createFileRecursively(parentDirectory);  // 如果父目录创建失败，不继续创建文件
+            }
+        }
+
+        // 判断文件是否存在，如果不存在则创建
+        if (!file.exists()) {
+            if (file.createNewFile()) {
+                System.out.println("文件创建成功: " + file.getAbsolutePath());
+            } else {
+                System.out.println("文件创建失败");
+            }
+        } else {
+            System.out.println("文件已存在");
         }
     }
 
@@ -222,49 +257,30 @@ public class AudioUtils {
         return paddedArray;
     }
 
-    public static class WavHeader {
-        private int numChannels;
-        private int sampleRate;
-        private int bitsPerSample;
-        private int dataSize;
-        private int bytesPerSample;
-        private int headerSize;
+    // 将byte数组转换为double数组
+    public static double[] bytesToDoubles(byte[] byteArray) {
+        int bytesPerSample = 4;  // 32位PCM，每个样本占4字节
+        int sampleCount = byteArray.length / bytesPerSample;
+        double[] doubleArray = new double[sampleCount];
 
-        public WavHeader(int numChannels, int sampleRate, int bitsPerSample, int dataSize, int bytesPerSample, int headerSize) {
-            this.numChannels = numChannels;
-            this.sampleRate = sampleRate;
-            this.bitsPerSample = bitsPerSample;
-            this.dataSize = dataSize;
-            this.bytesPerSample = bytesPerSample;
-            this.headerSize = headerSize;
+        for (int i = 0; i < sampleCount; i++) {
+            // 从byte数组中读取每个样本的值
+            int sampleValue = byteArrayToInt(byteArray, i * bytesPerSample);
+
+            // 将样本值映射到 -1.0 到 1.0 范围
+            double normalizedValue = sampleValue / (double) Integer.MAX_VALUE;  // 32位有符号整数的范围
+
+            // 存储到double数组中
+            doubleArray[i] = normalizedValue;
         }
 
-        public int getHeaderSize() {
-            return headerSize;
-        }
+        return doubleArray;
+    }
 
-        public void setHeaderSize(int headerSize) {
-            this.headerSize = headerSize;
-        }
-
-        public int getNumChannels() {
-            return numChannels;
-        }
-
-        public int getSampleRate() {
-            return sampleRate;
-        }
-
-        public int getBitsPerSample() {
-            return bitsPerSample;
-        }
-
-        public int getDataSize() {
-            return dataSize;
-        }
-
-        public int getBytesPerSample() {
-            return bytesPerSample;
-        }
+    private static int byteArrayToInt(byte[] byteArray, int offset) {
+        return (byteArray[offset + 3] & 0xFF) << 24 |
+                (byteArray[offset + 2] & 0xFF) << 16 |
+                (byteArray[offset + 1] & 0xFF) << 8 |
+                (byteArray[offset] & 0xFF);
     }
 }

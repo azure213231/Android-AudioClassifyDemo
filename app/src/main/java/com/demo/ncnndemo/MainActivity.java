@@ -29,6 +29,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        try {
+            PytorchRepository.getInstance().init(getApplicationContext());
+            ToastUtil.showToast(getApplicationContext(),"模型初始化成功");
+        } catch (Exception e) {
+            ToastUtil.showToast(getApplicationContext(),"模型初始化失败");
+        }
+
         binding.assetsAudioClassifyLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -27,19 +27,12 @@ public class FilterBankProcessor {
     private static double[][][] extractFbank(double[] waveforms){
         List<double[][]> logFbanks = new ArrayList<>();
 
-//        for (double[] waveform : waveforms) {
-//            if (waveform.length == 1) {
-//                // If waveform is 1D, convert it to a 2D array (assuming it represents a single channel)
-//                waveform = new double[][]{waveform};
-//            }
-            double[] waveform = waveforms;
-            double[][] logFbank = computeFilterBanks(waveform);
-            // Transpose logFbank
-            double[][] logFbankNew = transpose(logFbank);
-            logFbanks.add(logFbankNew);
-//        }
+        double[] waveform = waveforms;
+        double[][] logFbank = computeFilterBanks(waveform);
+        // Transpose logFbank
+        double[][] logFbankNew = transpose(logFbank);
+        logFbanks.add(logFbankNew);
 
-        // Convert List<double[][]> to a 3D array
         double[][][] logFbanksArray = logFbanks.toArray(new double[0][][]);
 
         return logFbanksArray;
