@@ -145,17 +145,29 @@ public class AudioUtils {
     }
 
     public static void saveAudioClassifyWav(Context context,String classify,double[] audioData){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+        SimpleDateFormat daySdf = new SimpleDateFormat("yyyy-MM-dd");//yyyy-MM-dd HH:mm:ss
+        SimpleDateFormat secondSdf = new SimpleDateFormat("HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+        long twentySleepTimestampOfDay = DateUtils.getTwentySleepTimestampOfDay(System.currentTimeMillis());
+        Date date = new Date(twentySleepTimestampOfDay);
+        String day = daySdf.format(date);
+        String second = secondSdf.format(date);
+
         String savePath = context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "audioClassify" + File.separator
-                + classify + File.separator + sdf.format(new Date(System.currentTimeMillis())) + ".wav";
+                + day + File.separator + classify + File.separator + second + ".wav";
         Log.e("TAG", "run: "+savePath );
         AudioUtils.saveDoubleArrayAsWav(audioData,savePath);
     }
 
     public static void saveAudioClassifyNSXWav(Context context,String classify,double[] audioData){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+        SimpleDateFormat daySdf = new SimpleDateFormat("yyyy-MM-dd");//yyyy-MM-dd HH:mm:ss
+        SimpleDateFormat secondSdf = new SimpleDateFormat("HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+        long twentySleepTimestampOfDay = DateUtils.getTwentySleepTimestampOfDay(System.currentTimeMillis());
+        Date date = new Date(twentySleepTimestampOfDay);
+        String day = daySdf.format(date);
+        String second = secondSdf.format(date);
+
         String savePath = context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "audioClassifyNSX" + File.separator
-                + classify + File.separator + sdf.format(new Date(System.currentTimeMillis())) + ".wav";
+                + day + File.separator + classify + File.separator + second + ".wav";
         Log.e("TAG", "run: "+savePath );
         AudioUtils.saveDoubleArrayAsWav(audioData,savePath);
     }
@@ -283,6 +295,26 @@ public class AudioUtils {
         }
 
         return doubleArray;
+    }
+
+    public static double getAudioDb(double[] doubles){
+        //分贝数
+        double amplitude = calculateAmplitude(doubles);
+        double decibels = calculateDecibels(amplitude);
+        return decibels;
+    }
+    private static double calculateAmplitude(double[] floatBuffer) {
+        int floatCount = floatBuffer.length;
+        double sum = 0;
+        for (int i = 0; i < floatCount; i++) {
+            sum += floatBuffer[i] * floatBuffer[i];
+        }
+        return Math.sqrt(sum / floatCount);
+    }
+
+    private static double calculateDecibels(double amplitude) {
+        double REFERENCE_AMPLITUDE = 1.0;
+        return 20 * Math.log10(amplitude / REFERENCE_AMPLITUDE);
     }
 
     private static int byteArrayToInt(byte[] byteArray, int offset) {

@@ -1,34 +1,25 @@
 package com.demo.ncnndemo;
 
-import static com.demo.ncnndemo.AssetsAudioClassify.assetFilePath;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 
 import com.demo.ncnndemo.databinding.ActivityRecordAudioClassifyBinding;
 
-import org.pytorch.Module;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class RecordAudioClassifyActivity extends AppCompatActivity {
 
@@ -46,7 +37,6 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     //上一次音频分析时间
     private long lastRecordTimeStamp;
     private boolean isAudioClassify = false;
-    private ActivityResultLauncher<Intent> directoryPickerLauncher;
 
 
     @Override
@@ -65,22 +55,6 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        // 检查权限
-        if (checkRecordAudioPermission()) {
-            // 已经授予权限
-            // 进行录音相关操作
-        } else {
-            // 请求权限
-            requestRecordAudioPermission();
-        }
-
-        audioRecord = new AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                SAMPLE_RATE,
-                CHANNEL_CONFIG,
-                AUDIO_FORMAT,
-                BUFFER_SIZE
-        );
 
         binding.startRecord.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,6 +100,21 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
+        // 检查权限
+        if (checkRecordAudioPermission()) {
+            // 已经授予权限
+            // 进行录音相关操作
+            audioRecord = new AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    SAMPLE_RATE,
+                    CHANNEL_CONFIG,
+                    AUDIO_FORMAT,
+                    BUFFER_SIZE
+            );
+        } else {
+            // 请求权限
+            requestRecordAudioPermission();
+        }
         if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
             lastRecordTimeStamp = System.currentTimeMillis();
             isRecording = true;
@@ -160,7 +149,7 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
         byte[] buffer = new byte[BUFFER_SIZE];
         while (isRecording) {
             int readSize = audioRecord.read(buffer, 0, BUFFER_SIZE);
-            if (readSize != AudioRecord.ERROR_INVALID_OPERATION && readSize != AudioRecord.ERROR_BAD_VALUE) {
+            if (readSize != AudioRecord.ERROR_INVALID_OPERATION && readSize != AudioRecord.ERROR_BAD_VALUE && readSize > 0) {
                 // 处理音频数据
                 byte[] data = new byte[readSize];
                 System.arraycopy(buffer, 0, data, 0, readSize);
@@ -184,10 +173,19 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
                             public void run() {
                                 try {
                                     isAudioClassify = true;
+
+                                    //分贝数
+                                    double decibels = AudioUtils.getAudioDb(doubles);
+                                    // 创建 DecimalFormat 对象，指定保留两位小数
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                                    // 格式化 double 类型的数值
+                                    String formattedNumber = decimalFormat.format(decibels);
+                                    binding.decibelsResult.setText("db: " + formattedNumber);
+
                                     PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
                                     binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
 
-                                    if (audioClassifyResult.getScore() > 0.8){
+                                    if (audioClassifyResult.getScore() > 0.90 && decibels > -50){
                                         AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
                                     }
                                 } catch (Exception e) {
