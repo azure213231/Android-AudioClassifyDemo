@@ -6,11 +6,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.PowerManager;
+import android.util.Log;
 import android.view.View;
 
 import com.demo.ncnndemo.databinding.ActivityRecordAudioClassifyBinding;
@@ -25,19 +34,45 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
 
     ActivityRecordAudioClassifyBinding binding;
 
-    private AudioRecord audioRecord;
-    private boolean isRecording = false;
     private static final int SAMPLE_RATE = 16000;
     private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
     private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_32BIT;
     private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
     private static final int RECORD_AUDIO_PERMISSION_CODE = 1;
-    private static final int OPEN_DIRECTORY_REQUEST_CODE = 3;
-    private ArrayList<byte[]> recordedDataList = new ArrayList<>();
-    //上一次音频分析时间
-    private long lastRecordTimeStamp;
-    private boolean isAudioClassify = false;
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
+    private AudioClassifyService audioClassifyService;
+    private boolean isBound = false;
+    private static final String TAG = "RecordAudioClassifyActivity";
 
+    // ServiceConnection 用于处理与服务的连接和断开连接
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            AudioClassifyService.AudioClassifyBinder binder = (AudioClassifyService.AudioClassifyBinder) service;
+            audioClassifyService = binder.getService();
+            isBound = true;
+
+            Log.d(TAG, "Service connected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            audioClassifyService = null;
+            isBound = false;
+
+            Log.d(TAG, "Service disconnected");
+        }
+    };
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // 处理接收到的广播，更新 UI 或执行其他操作
+            String name = intent.getStringExtra("name");
+            String data = intent.getStringExtra("data");
+            updateUI(name,data);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,27 +84,70 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter("com.example.ACTION_UPDATE_UI");
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopRecording();
+//        stopRecording();
+        // 解绑服务
+        if (isBound) {
+            unbindService(serviceConnection);
+            isBound = false;
+        }
     }
 
     private void initView() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        } else {
+            // Permission already granted
+        }
 
         binding.startRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 开始录音
-                startRecording();
+                // 检查权限
+                if (checkRecordAudioPermission()) {
+                    // 已经授予权限
+                    // 进行录音相关操作
+                } else {
+                    // 请求权限
+                    requestRecordAudioPermission();
+                }
+                startAudioClassifyService();
             }
         });
 
         binding.stopRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopRecording();
+                // 解绑服务
+                if (isBound) {
+                    unbindService(serviceConnection);
+                    isBound = false;
+                }
             }
         });
+    }
+
+    private void startAudioClassifyService() {
+        // 绑定服务
+        bindService(new Intent(this, AudioClassifyService.class), serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -86,6 +164,14 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
                 // 可以在这里提供一些反馈或者禁用相关功能
                 ToastUtil.showToast(this,"没有录音权限");
             }
+        } else if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE) {
+            // 检查用户是否授予了写入外部存储的权限
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 用户授予了权限，执行相应的操作
+//                performOperationsWithPermission();
+            } else {
+                // 用户拒绝了权限，可以在这里给出相应的提示或处理
+            }
         }
     }
 
@@ -99,121 +185,35 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
                 RECORD_AUDIO_PERMISSION_CODE);
     }
 
-    private void startRecording() {
-        // 检查权限
-        if (checkRecordAudioPermission()) {
-            // 已经授予权限
-            // 进行录音相关操作
-            audioRecord = new AudioRecord(
-                    MediaRecorder.AudioSource.MIC,
-                    SAMPLE_RATE,
-                    CHANNEL_CONFIG,
-                    AUDIO_FORMAT,
-                    BUFFER_SIZE
-            );
-        } else {
-            // 请求权限
-            requestRecordAudioPermission();
-        }
-        if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
-            lastRecordTimeStamp = System.currentTimeMillis();
-            isRecording = true;
-            audioRecord.startRecording();
-
-            // 开启新线程用于读取PCM数据
-            ThreadPool.runOnThread(new Runnable() {
-                @Override
-                public void run() {
-                    reduceAudio();
-                }
-            });
-
-            binding.startRecord.setVisibility(View.GONE);
-            binding.stopRecord.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void stopRecording() {
-        if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
-            isRecording = false;
-            audioRecord.stop();
-            audioRecord.release();
-
-            binding.startRecord.setVisibility(View.VISIBLE);
-            binding.stopRecord.setVisibility(View.GONE);
-        }
-    }
-
-    private void reduceAudio() {
-
-        byte[] buffer = new byte[BUFFER_SIZE];
-        while (isRecording) {
-            int readSize = audioRecord.read(buffer, 0, BUFFER_SIZE);
-            if (readSize != AudioRecord.ERROR_INVALID_OPERATION && readSize != AudioRecord.ERROR_BAD_VALUE && readSize > 0) {
-                // 处理音频数据
-                byte[] data = new byte[readSize];
-                System.arraycopy(buffer, 0, data, 0, readSize);
-                recordedDataList.add(data);
-
-                //如果距离上次分析超过3秒
-                if (System.currentTimeMillis() - lastRecordTimeStamp > 5 * 1000){
-
-                    // 合并从上次记录到现在录音数据
-                    byte[] finalRecordedData = concatenateByteArrays(recordedDataList);
-                    double[] doubles = AudioUtils.bytesToDoubles(finalRecordedData);
-
-//                    AudioUtils.saveAudioClassifyWav(this,"test",doubles);
-
-                    recordedDataList.clear();
-                    lastRecordTimeStamp = System.currentTimeMillis();
-
-                    if (!isAudioClassify){
-                        ThreadPool.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    isAudioClassify = true;
-
-                                    //分贝数
-                                    double decibels = AudioUtils.getAudioDb(doubles);
-                                    // 创建 DecimalFormat 对象，指定保留两位小数
-                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
-                                    // 格式化 double 类型的数值
-                                    String formattedNumber = decimalFormat.format(decibels);
-                                    binding.decibelsResult.setText("db: " + formattedNumber);
-
-                                    PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
-                                    binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
-
-                                    if (audioClassifyResult.getScore() > 0.90 && decibels > -50){
-                                        AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
-                                    }
-                                } catch (Exception e) {
-                                    ToastUtil.showToast(getApplicationContext(),"分析失败: " + e.getMessage());
-                                }
-                                isAudioClassify = false;
-                            }
-                        });
+    private void updateUI(String name,String data) {
+        // 在这里更新 UI
+        ThreadPool.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                if (name.equals("startRecord")){
+                    if (data.equals("GONE")){
+                        binding.startRecord.setVisibility(View.GONE);
+                    } else if (data.equals("VISIBLE")){
+                        binding.startRecord.setVisibility(View.VISIBLE);
                     }
+                } else if (name.equals("stopRecord")){
+                    if (data.equals("GONE")){
+                        binding.stopRecord.setVisibility(View.GONE);
+                    } else if (data.equals("VISIBLE")){
+                        binding.stopRecord.setVisibility(View.VISIBLE);
+                    }
+                } else if (name.equals("decibelsResult")){
+                    binding.decibelsResult.setText(data);
+                } else if (name.equals("classifyResult")){
+                    binding.classifyResult.setText(data);
+                } else if (name.equals("classifyResult")){
+                    binding.classifyResult.setText(data);
+                } else if (name.equals("classifyResult")){
+                    binding.classifyResult.setText(data);
+                } else if (name.equals("classifyResult")){
+                    binding.classifyResult.setText(data);
                 }
             }
-        }
-    }
-
-    private byte[] concatenateByteArrays(ArrayList<byte[]> arrayList) {
-        int totalLength = 0;
-        for (byte[] array : arrayList) {
-            totalLength += array.length;
-        }
-
-        byte[] result = new byte[totalLength];
-        int currentIndex = 0;
-
-        for (byte[] array : arrayList) {
-            System.arraycopy(array, 0, result, currentIndex, array.length);
-            currentIndex += array.length;
-        }
-
-        return result;
+        });
     }
 }

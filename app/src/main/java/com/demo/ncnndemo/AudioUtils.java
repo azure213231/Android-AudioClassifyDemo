@@ -192,10 +192,15 @@ public class AudioUtils {
     public static void saveAudioClassifyWav(Context context,String classify,double[] audioData){
         SimpleDateFormat daySdf = new SimpleDateFormat("yyyy-MM-dd");//yyyy-MM-dd HH:mm:ss
         SimpleDateFormat secondSdf = new SimpleDateFormat("HH:mm:ss");//yyyy-MM-dd HH:mm:ss
-        long twentySleepTimestampOfDay = DateUtils.getTwentySleepTimestampOfDay(System.currentTimeMillis());
+
+        long currentTimeMillis = System.currentTimeMillis();
+        long twentySleepTimestampOfDay = DateUtils.getTwentySleepTimestampOfDay(currentTimeMillis);
+
         Date date = new Date(twentySleepTimestampOfDay);
         String day = daySdf.format(date);
-        String second = secondSdf.format(date);
+
+        Date currentDate = new Date(currentTimeMillis);
+        String second = secondSdf.format(currentDate);
 
         String savePath = context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "audioClassify" + File.separator
                 + day + File.separator + classify + File.separator + second + ".wav";
@@ -206,10 +211,15 @@ public class AudioUtils {
     public static void saveAudioClassifyNSXWav(Context context,String classify,double[] audioData){
         SimpleDateFormat daySdf = new SimpleDateFormat("yyyy-MM-dd");//yyyy-MM-dd HH:mm:ss
         SimpleDateFormat secondSdf = new SimpleDateFormat("HH:mm:ss");//yyyy-MM-dd HH:mm:ss
-        long twentySleepTimestampOfDay = DateUtils.getTwentySleepTimestampOfDay(System.currentTimeMillis());
+
+        long currentTimeMillis = System.currentTimeMillis();
+        long twentySleepTimestampOfDay = DateUtils.getTwentySleepTimestampOfDay(currentTimeMillis);
+
         Date date = new Date(twentySleepTimestampOfDay);
         String day = daySdf.format(date);
-        String second = secondSdf.format(date);
+
+        Date currentDate = new Date(currentTimeMillis);
+        String second = secondSdf.format(currentDate);
 
         String savePath = context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "audioClassifyNSX" + File.separator
                 + day + File.separator + classify + File.separator + second + ".wav";
