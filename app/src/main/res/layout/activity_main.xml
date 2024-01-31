@@ -42,4 +42,21 @@
         android:layout_height="1dp"
         android:background="#EEE"/>
 
+    <LinearLayout
+        android:id="@+id/chose_audio_file_classify"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择5秒文件分析"
+            android:textColor="@color/black"
+            android:textSize="18sp"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#EEE"/>
+
 </LinearLayout>

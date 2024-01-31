@@ -49,6 +49,18 @@ public class MainActivity extends AppCompatActivity {
                 showRecordAudioClassifyActivity();
             }
         });
+
+        binding.choseAudioFileClassify.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showChoseAudioFileClassifyActivity();
+            }
+        });
+    }
+
+    private void showChoseAudioFileClassifyActivity() {
+        Intent intent = new Intent(this, ChoseAudioFileClassifyActivity.class);
+        startActivity(intent);
     }
 
     private void showAssetsAudioClassifyActivity() {

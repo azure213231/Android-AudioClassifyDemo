@@ -41,78 +41,13 @@ public class AssetsAudioClassify extends AppCompatActivity {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
 
             String fileName = "dogTest-0001.wav";
-            double[] audioAsFloatArray = AudioUtils.loadAudioAsDoubleArray( this,"audio/" + fileName);
+            double[] audioAsFloatArray = AudioUtils.loadAudioAsDoubleArrayByAssets( this,"audio/" + fileName);
+            PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),audioAsFloatArray);
 
-            //初始化webrtc降噪
-            WebRTCAudioUtils webRTCAudioUtils = new WebRTCAudioUtils();
-            long nsxId = webRTCAudioUtils.nsxCreate();
-            webRTCAudioUtils.nsxInit(nsxId,16000);
-            webRTCAudioUtils.nsxSetPolicy(nsxId,2);
-
-            Integer shortSize = 160;
-            short[] shortArray = ByteUtils.convertDoubleArrayToShortArray(audioAsFloatArray);
-            short[] padShortArray = AudioUtils.padShortArray(shortArray, shortSize);
-
-            short[][] splitShortArray = ByteUtils.splitShortArray(padShortArray, shortSize);
-            short[] nsxShortArray = new short[padShortArray.length];
-
-            for (int i = 0; i < splitShortArray.length; i++){
-                short[] outNsxData = new short[shortSize];
-                webRTCAudioUtils.nsxProcess(nsxId,splitShortArray[i],1,outNsxData);
-                System.arraycopy(outNsxData,0,nsxShortArray,i*shortSize,shortSize);
-            }
-            double[] nsxDoubleArray = ByteUtils.convertShortArrayToDoubleArray(nsxShortArray);
-            String savePath = getExternalFilesDir(null).getAbsolutePath() + File.separator + "recordPCMVoice" + File.separator + sdf.format(new Date(System.currentTimeMillis())) + fileName;
-            AudioUtils.saveDoubleArrayAsWav(nsxDoubleArray,savePath);
-
-            double[][][] feature = FilterBankProcessor.getFeature(nsxDoubleArray);
-            // 将三维的 double 转换为 一维float
-            float[] featureFloat = ByteUtils.convertToFloatArray(feature);
-
-            // 获取数组的形状
-            int dim1 = feature.length;
-            int dim2 = feature[0].length;
-            int dim3 = feature[0][0].length;
-
-            long shape[]={dim1,dim2,dim3};
-            Tensor inputTensor=Tensor.fromBlob(featureFloat,shape);//tensor初始化方法
-            // 将输入张量传递给模型
-            IValue input = IValue.from(inputTensor);
-            IValue output = module.forward(input);
-
-            // 处理模型的输出
-            Tensor outputTensor = output.toTensor();
-
-            // 假设 outputTensor 是你的模型的输出张量
-            long[] outputShape = outputTensor.shape();
-
-
-            String text = "";
-            //判断输出张量形状和对应的类型长度是否一致
-            if (SoundClassed.CLASSES.length != outputShape[1]){
-                text = "SoundClassed.length error";
-            } else {
-                // 获取整个输出张量的数据
-                float[] outputData = outputTensor.getDataAsFloatArray();
-
-                // 对概率分布进行 Softmax 处理
-                float[] softmaxProbabilities = softmax(outputData);
-
-                float maxScore = -Float.MAX_VALUE;
-                for (int i = 0; i < softmaxProbabilities.length; i++) {
-                    float score = softmaxProbabilities[i];
-                    if (softmaxProbabilities[i] < 0.001){
-                        score = 0f;
-                    }
-                    text = text + SoundClassed.CLASSES[i] + ": " + score + "\n";
-                    if (softmaxProbabilities[i] > maxScore) {
-                        maxScore = softmaxProbabilities[i];
-                    }
-                }
-            }
-
-            tv.setText(text);
+            tv.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

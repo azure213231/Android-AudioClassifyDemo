@@ -27,10 +27,55 @@ import java.util.Date;
 public class AudioUtils {
     private static final String TAG = "AudioUtils";
 
+    public static double[] loadAudioAsDoubleArray(byte[] audioData) {
+        try {
+            //采样率
+            Integer sampleRate = ByteUtils.getIntFromByte(audioData, 24, 4); // 获取采样率
+
+            // 设置音频格式
+            //通道数
+            Integer channelCount = ByteUtils.getIntFromByte(audioData, 22, 2);    // 声道数
+            //位宽，每个采样点的bit数
+            Integer sampleSizeInBits = ByteUtils.getIntFromByte(audioData, 34, 2); // 采样位数
+            // 计算每帧的字节数
+            int frameSize = (sampleSizeInBits / 8) * channelCount;
+            // 一个样本的时间（以秒为单位）
+            double sampleDuration = 1000.0 / sampleRate;
+            // 总样本数
+            int totalSamples = audioData.length / frameSize;
+            // 总时间（以秒为单位）
+            int duration = (int) (totalSamples * sampleDuration);
+            int frameCount = duration * sampleRate / 1000; // 计算帧数
+
+            // 将音频数据分割到每帧
+            // 将音频数据转换为浮点数数组
+            byte[] audioPcmData = new byte[frameSize * frameCount];
+//            double[] doubleArray = new double[frameCount];
+            // 计算实际需要复制的字节数
+            int remainingBytes = audioData.length - 44; // 假设 44 是 WAV 文件头的大小
+            int copyBytes = Math.min(remainingBytes, frameSize * frameCount);
+            // 进行复制
+            System.arraycopy(audioData, 44, audioPcmData, 0, copyBytes);
+
+            //编码格式0x01表示pcm
+            Integer audioFormat = ByteUtils.getIntFromByte(audioData, 20, 2);
+            //数据长度，单位字节
+            Integer dataSize = ByteUtils.getIntFromByte(audioData, 40, 4);
+
+            double[] doubleArray = AudioUtils.bytesToDoubles(audioPcmData);
+
+            //归一化
+            normalize(doubleArray,-20.0,300.0);
+            return doubleArray;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * 提取的音频方法与py中一致
      * */
-    public static double[] loadAudioAsDoubleArray(Context context, String filename) {
+    public static double[] loadAudioAsDoubleArrayByAssets(Context context, String filename) {
         AssetFileDescriptor assetFileDescriptor = null;
         try {
             MediaPlayer mediaPlayer = new MediaPlayer();
