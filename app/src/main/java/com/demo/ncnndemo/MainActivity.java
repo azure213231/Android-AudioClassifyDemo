@@ -41,16 +41,20 @@ public class MainActivity extends AppCompatActivity {
             ToastUtil.showToast(getApplicationContext(),"模型初始化失败");
         }
 
+        if (!PermissionUtils.isNotificationPermission(this)){
+            DefaultDialog defaultDialog = new DefaultDialog(this, "通知权限", "请在设置中授权通知权限，用于声音分类监测", new DefaultDialog.onClickListener() {
+                @Override
+                public void onConfirmCLick() {
+                    PermissionUtils.reqNotificationPermission(getApplicationContext());
+                }
 
-        //检查通知权限
-        // 在需要发送通知的地方检查并请求通知权限
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (!notificationManager.areNotificationsEnabled()){
-            openNotificationSettings();
+                @Override
+                void onCancelCLick() {
+                    ToastUtil.showToast(getApplicationContext(),"没有通知权限，请在设置中打开通知权限");
+                }
+            });
+            defaultDialog.show();
         }
-//        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
-//            openNotificationSettings();
-//        }
 
         binding.assetsAudioClassifyLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,25 +93,4 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
-
-    public void openNotificationSettings() {
-        Intent intent = new Intent();
-
-        // 根据不同的 Android 版本设置不同的 Action
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
-            intent.putExtra("android.provider.extra.APP_PACKAGE", getPackageName());
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
-            intent.putExtra("app_package", getPackageName());
-            intent.putExtra("app_uid", getApplicationInfo().uid);
-        } else {
-            intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
-            intent.addCategory(Intent.CATEGORY_DEFAULT);
-            intent.setData(Uri.parse("package:" + getPackageName()));
-        }
-
-        startActivity(intent);
-    }
 }

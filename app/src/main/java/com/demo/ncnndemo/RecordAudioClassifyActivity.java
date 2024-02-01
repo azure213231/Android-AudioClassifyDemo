@@ -1,10 +1,14 @@
 package com.demo.ncnndemo;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -48,6 +52,30 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     private AudioClassifyService audioClassifyService;
     private boolean isBound = false;
     private static final String TAG = "RecordAudioClassifyActivity";
+
+    // 处理权限请求结果
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PermissionUtils.STORAGE_PERMISSION_REQUEST_CODE) {
+            // 检查权限授予结果
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 用户授予了存储权限
+            } else {
+                // 用户拒绝了存储权限
+                ToastUtil.showToast(getApplicationContext(),"没有存储权限，请在设置中打开存储权限");
+            }
+        } else if (requestCode == PermissionUtils.RECORD_AUDIO_PERMISSION_CODE) {
+            // 检查权限授予结果
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 用户授予了录音权限
+                bindAudioClassifyService();
+            } else {
+                // 用户拒绝了录音权限
+                ToastUtil.showToast(getApplicationContext(),"没有录音权限，请在设置中打开录音权限");
+            }
+        }
+    }
 
     // ServiceConnection 用于处理与服务的连接和断开连接
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -105,52 +133,38 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        stopRecording();
-        // 解绑服务
-//        unbindAudioClassifyService();
         //注销广播接收器
         unregisterReceiver(receiver);
     }
 
     private void initView() {
-        // 检查是否已经授予存储权限
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-//            // 如果没有权限，请求权限
-//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST_CODE);
-//        } else {
-//            // 如果已经有权限，执行相应的操作
-//        }
+        FragmentActivity fragmentActivity = this;
+        if (!PermissionUtils.isExternalStoragePermission(this)){
+            DefaultDialog defaultDialog = new DefaultDialog(this, "存储权限", "请在设置中存储权限，用于声音分类监测", new DefaultDialog.onClickListener() {
+                @Override
+                public void onConfirmCLick() {
+                    PermissionUtils.reqExternalStoragePermission(fragmentActivity);
+                }
 
-        //判断Android 13 系统上的存储权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // 先判断有没有权限
-            if (!Environment.isExternalStorageManager()) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                intent.setData(Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, STORAGE_PERMISSION_REQUEST_CODE);
-            }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 先判断有没有权限
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST_CODE);
-            }
+                @Override
+                void onCancelCLick() {
+                    ToastUtil.showToast(getApplicationContext(),"没有存储权限，请在设置中打开存储权限");
+                }
+            });
+            defaultDialog.show();
         }
-
-
 
         binding.startRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // 检查权限
-                if (checkRecordAudioPermission()) {
+                if (PermissionUtils.isRecordAudioPermission(getApplicationContext())) {
                     // 已经授予权限
                     // 进行录音相关操作
                     bindAudioClassifyService();
                 } else {
                     // 请求权限
-                    requestRecordAudioPermission();
+                    PermissionUtils.reqRecordAudioPermission(fragmentActivity);
                 }
             }
         });
@@ -174,43 +188,6 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     private void bindAudioClassifyService() {
         // 绑定服务
         bindService(new Intent(this, AudioClassifyService.class), serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == RECORD_AUDIO_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // 用户授予了录音权限
-                // 进行录音相关操作
-                bindAudioClassifyService();
-            } else {
-                // 用户拒绝了录音权限
-                // 可以在这里提供一些反馈或者禁用相关功能
-                ToastUtil.showToast(this,"没有录音权限，请在设置中打开录音权限");
-            }
-        } else if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
-            // 检查用户是否授予了写入外部存储的权限
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // 用户授予了权限，执行相应的操作
-//                performOperationsWithPermission();
-            } else {
-                // 用户拒绝了权限，可以在这里给出相应的提示或处理
-                ToastUtil.showToast(this,"没有存储权限，请在设置中打开存储权限");
-            }
-        }
-    }
-
-    private boolean checkRecordAudioPermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestRecordAudioPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},
-                RECORD_AUDIO_PERMISSION_CODE);
     }
 
     private void updateUI(String name,String data) {

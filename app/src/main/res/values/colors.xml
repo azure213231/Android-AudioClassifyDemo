@@ -1,10 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="transparent">#00000000</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
+    <color name="purple_text">#8663CC</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+    <color name="main_color">#FF000000</color>
     <color name="black">#FF000000</color>
+
     <color name="white">#FFFFFFFF</color>
+    <color name="only_white">#FFFFFF</color>
+    <color name="only_white_80">#CCFFFFFF</color>
+    <color name="only_white_60">#99FFFFFF</color>
+    <color name="only_white_50">#7FFFFFFF</color>
+    <color name="only_white_40">#66FFFFFF</color>
+    <color name="only_white_35">#59FFFFFF</color>
+    <color name="only_white_30">#4CFFFFFF</color>
+    <color name="only_white_20">#33FFFFFF</color>
+    <color name="only_white_15">#26FFFFFF</color>
+    <color name="only_white_10">#19FFFFFF</color>
+
+    <color name="only_black_50">#7F000000</color>
+    <color name="gray_97">#979797</color>
+    <color name="gray_d8">#d8d8d8</color>
+    <color name="gray_d8_50">#7Fd8d8d8</color>
+
+    <color name="green_9FCC63_30">#4C9FCC63</color>
+    <color name="yellow_FEC000">#FEC000</color>
+    <color name="purple_736FF8_30">#4C736FF8</color>
+    <color name="purple_8152FF">#8152FF</color>
+    <color name="purple_8152FF_30">#4C8152FF</color>
+    <color name="purple_6627C0">#6627C0</color>
+
+    <!--    苹果SwitchButton-->
+    <color name="appleSwitchTrackColorChecked">#736FF8</color>
+    <color name="appleSwitchTrackColorUnchecked">#8d8d8d</color>
+    <color name="appleSwitchThumbColorChecked">#FFFFFF</color>
+    <color name="appleSwitchThumbColorUnchecked">#FFFFFF</color>
 </resources>

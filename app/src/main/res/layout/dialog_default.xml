@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <net.center.blurview.ShapeBlurView
+        android:id="@+id/dialog_default_background_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:blur_radius="15dp"
+        app:blur_overlay_color="@color/only_black_50"/>
+
+    <LinearLayout
+        android:id="@+id/dialog_default_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:gravity="top|center"
+        android:background="@drawable/background_gray_383838_corcer_25"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/dialog_default_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/only_white"
+            android:layout_marginTop="25dp"
+            android:textSize="16sp"
+            android:layout_marginHorizontal="45dp"/>
+
+        <TextView
+            android:id="@+id/dialog_default_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/only_white_60"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="45dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/dialog_default_cancel_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/cancel"
+                android:textColor="@color/only_white_60"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:paddingVertical="20dp"/>
+            <TextView
+                android:layout_width="1dp"
+                android:layout_height="wrap_content"
+                android:background="@color/only_white_60"/>
+            <TextView
+                android:id="@+id/dialog_default_confirm_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/confirm"
+                android:textColor="@color/only_white"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:paddingVertical="20dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
