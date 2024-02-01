@@ -47,21 +47,27 @@ public class PytorchRepository {
             webRTCAudioUtils.nsxInit(nsxId,16000);
             webRTCAudioUtils.nsxSetPolicy(nsxId,2);
 
+            long agcInst = webRTCAudioUtils.agcCreate();
+            webRTCAudioUtils.agcInit(agcInst, 0, 255, 2, 16000);
+            webRTCAudioUtils.agcSetConfig(agcInst, webRTCAudioUtils.getAgcConfig((short) 3, (short) 75, true));
+
             Integer shortSize = 160;
             short[] shortArray = ByteUtils.convertDoubleArrayToShortArray(audioAsFloatArray);
             short[] padShortArray = AudioUtils.padShortArray(shortArray, shortSize);
 
             short[][] splitShortArray = ByteUtils.splitShortArray(padShortArray, shortSize);
-            short[] nsxShortArray = new short[padShortArray.length];
+            short[] nsxAgcShortArray = new short[padShortArray.length];
 
             for (int i = 0; i < splitShortArray.length; i++){
                 short[] outNsxData = new short[shortSize];
+                short[] outAgcData = new short[shortSize];
                 webRTCAudioUtils.nsxProcess(nsxId,splitShortArray[i],1,outNsxData);
-                System.arraycopy(outNsxData,0,nsxShortArray,i*shortSize,shortSize);
+                webRTCAudioUtils.agcProcess(agcInst, outNsxData, 1, 160, outAgcData, 0, 0, 0, false);
+                System.arraycopy(outAgcData,0,nsxAgcShortArray,i*shortSize,shortSize);
             }
-            double[] nsxDoubleArray = ByteUtils.convertShortArrayToDoubleArray(nsxShortArray);
+            double[] nsxAgcDoubleArray = ByteUtils.convertShortArrayToDoubleArray(nsxAgcShortArray);
 
-            double[][][] feature = FilterBankProcessor.getFeature(nsxDoubleArray);
+            double[][][] feature = FilterBankProcessor.getFeature(nsxAgcDoubleArray);
             // 将三维的 double 转换为 一维float
             float[] featureFloat = ByteUtils.convertToFloatArray(feature);
 
@@ -112,7 +118,7 @@ public class PytorchRepository {
             //分贝数
             double decibels = AudioUtils.getAudioDb(audioAsFloatArray);
             if (audioClassifyResult.getScore() > 0.90 && decibels > -40){
-                AudioUtils.saveAudioClassifyNSXWav(context,audioClassifyResult.getLabel(),nsxDoubleArray);
+                AudioUtils.saveAudioClassifyNSXWav(context,audioClassifyResult.getLabel(),nsxAgcDoubleArray);
             }
 
             return audioClassifyResult;
