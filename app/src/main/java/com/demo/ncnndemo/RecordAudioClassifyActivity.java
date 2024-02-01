@@ -47,8 +47,6 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
     private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_32BIT;
     private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
-    private static final int RECORD_AUDIO_PERMISSION_CODE = 1;
-    private static final int STORAGE_PERMISSION_REQUEST_CODE = 2;
     private AudioClassifyService audioClassifyService;
     private boolean isBound = false;
     private static final String TAG = "RecordAudioClassifyActivity";
@@ -76,26 +74,6 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
             }
         }
     }
-
-    // ServiceConnection 用于处理与服务的连接和断开连接
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            AudioClassifyService.AudioClassifyBinder binder = (AudioClassifyService.AudioClassifyBinder) service;
-            audioClassifyService = binder.getService();
-            isBound = true;
-
-            Log.d(TAG, "Service connected");
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            audioClassifyService = null;
-            isBound = false;
-
-            Log.d(TAG, "Service disconnected");
-        }
-    };
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -154,6 +132,19 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
             defaultDialog.show();
         }
 
+        boolean isMyServiceRunning = ServiceUtils.isServiceRunning(getApplicationContext(), AudioClassifyService.class);
+        if (isMyServiceRunning) {
+            // 服务正在运行
+            isBound = true;
+            binding.startRecord.setVisibility(View.GONE);
+            binding.stopRecord.setVisibility(View.VISIBLE);
+        } else {
+            // 服务未运行
+            isBound = false;
+            binding.startRecord.setVisibility(View.VISIBLE);
+            binding.stopRecord.setVisibility(View.GONE);
+        }
+
         binding.startRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -178,16 +169,15 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
     }
 
     private void unbindAudioClassifyService() {
-        // 解绑服务
-        if (isBound) {
-            unbindService(serviceConnection);
-            isBound = false;
-        }
+        // 停止服务
+        Intent serviceIntent = new Intent(this, AudioClassifyService.class);
+        stopService(serviceIntent);
     }
 
     private void bindAudioClassifyService() {
-        // 绑定服务
-        bindService(new Intent(this, AudioClassifyService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        // 开启服务
+        Intent serviceIntent = new Intent(this, AudioClassifyService.class);
+        ContextCompat.startForegroundService(this, serviceIntent);
     }
 
     private void updateUI(String name,String data) {

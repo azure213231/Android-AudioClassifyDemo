@@ -38,14 +38,7 @@ public class AudioClassifyService  extends Service {
     private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
     private static final int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "YourChannelId";
-
-    private final IBinder binder = new AudioClassifyBinder();
-
-    public class AudioClassifyBinder extends Binder {
-        AudioClassifyService getService() {
-            return AudioClassifyService.this;
-        }
-    }
+    private Notification notification;
 
     @Override
     public void onCreate() {
@@ -57,31 +50,36 @@ public class AudioClassifyService  extends Service {
         createNotificationChannel();
 
         // 创建通知
-        Notification notification = buildNotification();
-
-        // 将服务置于前台
-        startForeground(NOTIFICATION_ID, notification);
+        notification = buildNotification();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "Service destroyed");
+        stopRecording();
         stopForeground(true);
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        // 将服务置于前台
+        startForeground(NOTIFICATION_ID, notification);
+        startRecording();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+
+
+    @Override
     public IBinder onBind(Intent intent) {
         // 如果服务不提供绑定，则返回 null
-        // 开始录音
-        startRecording();
-        return binder;
+        return null;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d(TAG, "Service unbound");
-        stopRecording();
         return super.onUnbind(intent);
     }
 
