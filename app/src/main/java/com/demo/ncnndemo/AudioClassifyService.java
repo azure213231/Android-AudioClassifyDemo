@@ -190,9 +190,20 @@ public class AudioClassifyService  extends Service {
 //                                    binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
                                     sendBorderCast("classifyResult",audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
 
+//                                    if (audioClassifyResult.getScore() > 0.90 && decibels > -40){
+//                                        AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
+//                                    }
 
-                                    if (audioClassifyResult.getScore() > 0.90 && decibels > -40){
-                                        AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
+                                    if (decibels > 50){
+                                        //识别率90%以上按照识别结果保存
+                                        if (audioClassifyResult.getScore() > 0.90){
+                                            AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
+                                        } else {
+                                            //声音很大，但是识别结果都不匹配
+                                            if (decibels > 60){
+                                                AudioUtils.saveAudioClassifyWav(getApplicationContext(),"unknown",doubles);
+                                            }
+                                        }
                                     }
                                 } catch (Exception e) {
                                     ToastUtil.showToast(getApplicationContext(),"分析失败: " + e.getMessage());

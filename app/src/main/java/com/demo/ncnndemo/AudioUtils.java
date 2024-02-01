@@ -368,7 +368,7 @@ public class AudioUtils {
     }
 
     private static double calculateDecibels(double amplitude) {
-        double REFERENCE_AMPLITUDE = 1.0;
+        double REFERENCE_AMPLITUDE = 20.0e-6;
         return 20 * Math.log10(amplitude / REFERENCE_AMPLITUDE);
     }
 

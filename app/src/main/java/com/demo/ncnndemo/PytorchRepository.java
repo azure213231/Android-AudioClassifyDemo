@@ -117,8 +117,19 @@ public class PytorchRepository {
 
             //分贝数
             double decibels = AudioUtils.getAudioDb(audioAsFloatArray);
-            if (audioClassifyResult.getScore() > 0.90 && decibels > -40){
-                AudioUtils.saveAudioClassifyNSXWav(context,audioClassifyResult.getLabel(),nsxAgcDoubleArray);
+//            if (audioClassifyResult.getScore() > 0.90 && decibels > -40){
+//                AudioUtils.saveAudioClassifyNSXWav(context,audioClassifyResult.getLabel(),nsxAgcDoubleArray);
+//            }
+            if (decibels > 50){
+                //识别率90%以上按照识别结果保存
+                if (audioClassifyResult.getScore() > 0.90){
+                    AudioUtils.saveAudioClassifyWav(context,audioClassifyResult.getLabel(),nsxAgcDoubleArray);
+                } else {
+                    //声音很大，但是识别结果都不匹配
+                    if (decibels > 60){
+                        AudioUtils.saveAudioClassifyWav(context,"unknown",nsxAgcDoubleArray);
+                    }
+                }
             }
 
             return audioClassifyResult;
