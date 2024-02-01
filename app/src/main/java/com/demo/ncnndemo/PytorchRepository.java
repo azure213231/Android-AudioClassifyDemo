@@ -111,7 +111,7 @@ public class PytorchRepository {
 
             //分贝数
             double decibels = AudioUtils.getAudioDb(audioAsFloatArray);
-            if (audioClassifyResult.getScore() > 0.90 && decibels > -50){
+            if (audioClassifyResult.getScore() > 0.90 && decibels > -40){
                 AudioUtils.saveAudioClassifyNSXWav(context,audioClassifyResult.getLabel(),nsxDoubleArray);
             }
 

@@ -1,18 +1,23 @@
 package com.demo.ncnndemo;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -31,6 +36,8 @@ public class AudioClassifyService  extends Service {
     private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
     private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_32BIT;
     private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+    private static final int NOTIFICATION_ID = 1;
+    private static final String CHANNEL_ID = "YourChannelId";
 
     private final IBinder binder = new AudioClassifyBinder();
 
@@ -44,28 +51,28 @@ public class AudioClassifyService  extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Service created");
-    }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "Service started");
+        // 在服务停止时移除通知
+        // 创建通知渠道（适用于 Android 8.0 及以上版本）
+        createNotificationChannel();
 
-        // 在这里执行你希望在后台运行的逻辑
+        // 创建通知
+        Notification notification = buildNotification();
 
-        // 如果服务被系统终止，系统会尝试重新创建服务
-        return START_STICKY;
+        // 将服务置于前台
+        startForeground(NOTIFICATION_ID, notification);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "Service destroyed");
+        stopForeground(true);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         // 如果服务不提供绑定，则返回 null
-
         // 开始录音
         startRecording();
         return binder;
@@ -76,6 +83,31 @@ public class AudioClassifyService  extends Service {
         Log.d(TAG, "Service unbound");
         stopRecording();
         return super.onUnbind(intent);
+    }
+
+    private Notification buildNotification() {
+        // 创建通知
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("AudioClassify")
+                .setContentText("startRecord")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
+        return builder.build();
+    }
+
+    private void createNotificationChannel() {
+        // 创建通知渠道（适用于 Android 8.0 及以上版本）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "AudioClassify";
+            String description = "startRecord";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -101,8 +133,6 @@ public class AudioClassifyService  extends Service {
                 }
             });
 
-//            binding.startRecord.setVisibility(View.GONE);
-//            binding.stopRecord.setVisibility(View.VISIBLE);
             sendBorderCast("startRecord","GONE");
             sendBorderCast("stopRecord","VISIBLE");
         }
@@ -114,8 +144,6 @@ public class AudioClassifyService  extends Service {
             audioRecord.stop();
             audioRecord.release();
 
-//            binding.startRecord.setVisibility(View.VISIBLE);
-//            binding.stopRecord.setVisibility(View.GONE);
             sendBorderCast("startRecord","VISIBLE");
             sendBorderCast("stopRecord","GONE");
         }
@@ -165,7 +193,7 @@ public class AudioClassifyService  extends Service {
                                     sendBorderCast("classifyResult",audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
 
 
-                                    if (audioClassifyResult.getScore() > 0.90 && decibels > -50){
+                                    if (audioClassifyResult.getScore() > 0.90 && decibels > -40){
                                         AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
                                     }
                                 } catch (Exception e) {
@@ -198,7 +226,7 @@ public class AudioClassifyService  extends Service {
     }
 
     private void sendBorderCast(String name,String data){
-        Intent intent = new Intent("com.example.ACTION_UPDATE_UI");
+        Intent intent = new Intent("com.demo.ncnndemo.AudioClassifyService.ACTION_UPDATE_UI");
         intent.putExtra("name", name);
         intent.putExtra("data", data);
         sendBroadcast(intent);

@@ -2,8 +2,26 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--    录音权限-->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!--    网络连接-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!--    读写权限-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!--    前台服务权限-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <!--    通知权限-->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!--    Android13通知权限-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!--    Android13读写权限-->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+
+
 
     <application
         android:allowBackup="true"
@@ -37,7 +55,8 @@
         <service
             android:name=".AudioClassifyService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:stopWithTask="true" />
 
     </application>
 

@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:text="分析结果(仅保存识别结果大于0.90,分贝数大于-50的数据)"/>
+            android:text="分析结果"/>
         <TextView
             android:id="@+id/classify_result"
             android:layout_width="wrap_content"
