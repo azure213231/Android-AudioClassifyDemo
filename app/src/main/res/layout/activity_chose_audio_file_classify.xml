@@ -28,14 +28,32 @@
         android:textColor="@color/black"
         android:text="file_path"/>
 
-    <TextView
-        android:id="@+id/classify_result"
+    <LinearLayout
+        android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:paddingVertical="10dp"
-        android:paddingHorizontal="20dp"
-        android:textColor="@color/black"
-        android:text="classify_result"/>
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/classify_result"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="20dp"
+            android:textColor="@color/black"
+            android:text="classify_result"/>
+        <TextView
+            android:id="@+id/db_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="20dp"
+            android:textColor="@color/black"
+            android:text="db_result"/>
+    </LinearLayout>
+
+
 </LinearLayout>

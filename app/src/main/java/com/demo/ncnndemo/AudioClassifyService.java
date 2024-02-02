@@ -183,18 +183,12 @@ public class AudioClassifyService  extends Service {
                                     DecimalFormat decimalFormat = new DecimalFormat("#.##");
                                     // 格式化 double 类型的数值
                                     String formattedNumber = decimalFormat.format(decibels);
-//                                    binding.decibelsResult.setText("db: " + formattedNumber);
                                     sendBorderCast("decibelsResult","db: " + formattedNumber);
 
                                     PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
-//                                    binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
                                     sendBorderCast("classifyResult",audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
 
-//                                    if (audioClassifyResult.getScore() > 0.90 && decibels > -40){
-//                                        AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
-//                                    }
-
-                                    if (decibels > 50){
+                                    if (decibels > 35){
                                         //识别率90%以上按照识别结果保存
                                         if (audioClassifyResult.getScore() > 0.90){
                                             AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);

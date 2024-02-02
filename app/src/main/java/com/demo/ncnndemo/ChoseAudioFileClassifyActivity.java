@@ -81,8 +81,10 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
                 binding.filePath.setText(audioUri.getPath());
                 double[] doubles = AudioUtils.loadAudioAsDoubleArray(bytes);
                 try {
+                    double decibels = AudioUtils.getAudioDb(doubles);
                     PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
                     binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
+                    binding.dbResult.setText("dB: " + decibels);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
