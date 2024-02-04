@@ -190,11 +190,11 @@ public class AudioClassifyService  extends Service {
 
                                     if (decibels > 35){
                                         //识别率90%以上按照识别结果保存
-                                        if (audioClassifyResult.getScore() > 0.90){
+                                        if (audioClassifyResult.getScore() > 0.95){
                                             AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
                                         } else {
                                             //声音很大，但是识别结果都不匹配
-                                            if (decibels > 60){
+                                            if (decibels > 50){
                                                 AudioUtils.saveAudioClassifyWav(getApplicationContext(),"unknown",doubles);
                                             }
                                         }
