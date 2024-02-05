@@ -50,7 +50,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="选择5秒文件分析"
+            android:text="选择APP内录制音频分析"
             android:textColor="@color/black"
             android:textSize="18sp"/>
     </LinearLayout>
