@@ -1,4 +1,4 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.data;
 
 public class SoundClassed {
     public static String[] CLASSES = new String[]{

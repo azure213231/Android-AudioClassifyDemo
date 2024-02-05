@@ -1,15 +1,15 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationManagerCompat;
 
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+
+import com.demo.ncnndemo.dialog.DefaultDialog;
+import com.demo.ncnndemo.utils.PermissionUtils;
+import com.demo.ncnndemo.repository.PytorchRepository;
+import com.demo.ncnndemo.utils.ToastUtil;
 import com.demo.ncnndemo.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                void onCancelCLick() {
+                public void onCancelCLick() {
                     ToastUtil.showToast(getApplicationContext(),"没有通知权限，请在设置中打开通知权限");
                 }
             });

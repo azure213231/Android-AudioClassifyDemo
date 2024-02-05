@@ -1,4 +1,4 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.utils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

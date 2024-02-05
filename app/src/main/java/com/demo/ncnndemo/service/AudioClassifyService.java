@@ -1,4 +1,4 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.service;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -9,15 +9,18 @@ import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
-import android.view.View;
 
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+
+import com.demo.ncnndemo.utils.AudioUtils;
+import com.demo.ncnndemo.repository.PytorchRepository;
+import com.demo.ncnndemo.R;
+import com.demo.ncnndemo.utils.ThreadPool;
+import com.demo.ncnndemo.utils.ToastUtil;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -229,7 +232,7 @@ public class AudioClassifyService  extends Service {
     }
 
     private void sendBorderCast(String name,String data){
-        Intent intent = new Intent("com.demo.ncnndemo.AudioClassifyService.ACTION_UPDATE_UI");
+        Intent intent = new Intent("com.demo.ncnndemo.service.AudioClassifyService.ACTION_UPDATE_UI");
         intent.putExtra("name", name);
         intent.putExtra("data", data);
         sendBroadcast(intent);

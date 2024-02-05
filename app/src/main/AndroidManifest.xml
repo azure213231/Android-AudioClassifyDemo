@@ -23,22 +23,22 @@
         android:theme="@style/Theme.NCNNDemo"
         tools:targetApi="31">
         <activity
-            android:name=".Activity.FolderContentActivity"
+            android:name=".activity.FolderContentActivity"
             android:exported="false" />
         <activity
-            android:name=".AppFileActivity"
+            android:name=".activity.AppFileActivity"
             android:exported="false" />
         <activity
-            android:name=".ChoseAudioFileClassifyActivity"
+            android:name=".activity.ChoseAudioFileClassifyActivity"
             android:exported="false" />
         <activity
-            android:name=".RecordAudioClassifyActivity"
+            android:name=".activity.RecordAudioClassifyActivity"
             android:exported="false" />
         <activity
-            android:name=".AssetsAudioClassify"
+            android:name=".activity.AssetsAudioClassify"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -48,7 +48,7 @@
         </activity>
 
         <service
-            android:name=".AudioClassifyService"
+            android:name=".service.AudioClassifyService"
             android:enabled="true"
             android:exported="false"
             android:stopWithTask="true" />

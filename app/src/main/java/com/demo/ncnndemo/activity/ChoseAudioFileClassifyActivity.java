@@ -1,29 +1,22 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.documentfile.provider.DocumentFile;
 
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.view.View;
 
+import com.demo.ncnndemo.repository.PytorchRepository;
+import com.demo.ncnndemo.utils.ThreadPool;
 import com.demo.ncnndemo.databinding.ActivityChoseAudioFileClassifyBinding;
+import com.demo.ncnndemo.utils.AudioUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
 

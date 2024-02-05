@@ -1,4 +1,4 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.utils;
 
 import be.tarsos.dsp.mfcc.MFCC;
 

@@ -1,4 +1,4 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.utils;
 
 import android.app.ActivityManager;
 import android.content.Context;

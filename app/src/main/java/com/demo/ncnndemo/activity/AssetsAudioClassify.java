@@ -1,4 +1,4 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -6,11 +6,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.demo.ncnndemo.utils.AudioUtils;
+import com.demo.ncnndemo.utils.NCNNUtils;
+import com.demo.ncnndemo.repository.PytorchRepository;
 import com.demo.ncnndemo.databinding.ActivityAssetsAudioClassfyBinding;
 
-import org.pytorch.IValue;
 import org.pytorch.Module;
-import org.pytorch.Tensor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class AssetsAudioClassify extends AppCompatActivity {
 

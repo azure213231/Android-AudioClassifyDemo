@@ -1,43 +1,27 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.activity;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.IBinder;
-import android.os.PowerManager;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 
+import com.demo.ncnndemo.dialog.DefaultDialog;
+import com.demo.ncnndemo.utils.PermissionUtils;
+import com.demo.ncnndemo.utils.ServiceUtils;
+import com.demo.ncnndemo.utils.ThreadPool;
+import com.demo.ncnndemo.utils.ToastUtil;
 import com.demo.ncnndemo.databinding.ActivityRecordAudioClassifyBinding;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
+import com.demo.ncnndemo.service.AudioClassifyService;
 
 public class RecordAudioClassifyActivity extends AppCompatActivity {
 
@@ -92,7 +76,7 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         //注册广播接收器
-        IntentFilter filter = new IntentFilter("com.demo.ncnndemo.AudioClassifyService.ACTION_UPDATE_UI");
+        IntentFilter filter = new IntentFilter("com.demo.ncnndemo.service.AudioClassifyService.ACTION_UPDATE_UI");
         registerReceiver(receiver, filter);
 
         initView();
@@ -125,7 +109,7 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
                 }
 
                 @Override
-                void onCancelCLick() {
+                public void onCancelCLick() {
                     ToastUtil.showToast(getApplicationContext(),"没有存储权限，请在设置中打开存储权限");
                 }
             });

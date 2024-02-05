@@ -1,4 +1,4 @@
-package com.demo.ncnndemo;
+package com.demo.ncnndemo.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -97,7 +97,7 @@ public class DefaultDialog extends Dialog {
     }
 
     public abstract static class onClickListener{
-        void onConfirmCLick(){};
-        void onCancelCLick(){};
+        public void onConfirmCLick(){};
+        public void onCancelCLick(){};
     }
 }
