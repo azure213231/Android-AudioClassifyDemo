@@ -1,27 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <!--    录音权限-->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <!--    网络连接-->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!--    读写权限-->
+    <!-- 录音权限 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" /> <!-- 网络连接 -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 读写权限 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!--    前台服务权限-->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-
-    <!--    通知权限-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- 前台服务权限 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 通知权限 -->
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!--    Android13通知权限-->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <!--    Android13读写权限-->
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
-
-
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- Android13通知权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Android13读写权限 -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -33,6 +22,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NCNNDemo"
         tools:targetApi="31">
+        <activity
+            android:name=".Activity.FolderContentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AppFileActivity"
+            android:exported="false" />
         <activity
             android:name=".ChoseAudioFileClassifyActivity"
             android:exported="false" />
@@ -58,6 +53,15 @@
             android:exported="false"
             android:stopWithTask="true" />
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.demo.ncnndemo.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

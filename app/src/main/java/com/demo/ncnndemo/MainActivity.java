@@ -76,6 +76,18 @@ public class MainActivity extends AppCompatActivity {
                 showChoseAudioFileClassifyActivity();
             }
         });
+
+        binding.openAppFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAppFileActivity();
+            }
+        });
+    }
+
+    private void showAppFileActivity() {
+        Intent intent = new Intent(this, AppFileActivity.class);
+        startActivity(intent);
     }
 
     private void showChoseAudioFileClassifyActivity() {
