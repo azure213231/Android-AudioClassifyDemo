@@ -78,5 +78,6 @@
         app:layout_constraintRight_toRightOf="parent"
         android:textSize="14sp"
         android:paddingHorizontal="20dp"
-        android:text="音频文件保存在：Android/data/com.demo.ncnndemo/files/audioClassify/ 目录下"/>
+        android:text="音频数据可以在”首页-打开APP存储目录“下查看\n\n绝对路径为：Android/data/com.demo.ncnndemo/files/"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

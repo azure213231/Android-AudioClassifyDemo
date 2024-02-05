@@ -14,13 +14,13 @@ extern "C" {
 
 
 JNIEXPORT jlong JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsCreate(JNIEnv *env, jobject obj) {
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsCreate(JNIEnv *env, jobject obj) {
     return (long) WebRtcNs_Create();
 }
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsInit(JNIEnv *env, jobject obj, jint nsHandler,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsInit(JNIEnv *env, jobject obj, jint nsHandler,
                                                           jint frequency) {
     NsHandle *handler = (NsHandle *) nsHandler;
     if (handler == nullptr) {
@@ -31,7 +31,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_nsInit(JNIEnv *env, jobject obj, jint ns
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsSetPolicy(JNIEnv *env, jobject obj, jint
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsSetPolicy(JNIEnv *env, jobject obj, jint
 nsHandler, jint mode) {
     NsHandle *handle = (NsHandle *) nsHandler;
     if (handle == nullptr) {
@@ -42,7 +42,7 @@ nsHandler, jint mode) {
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsProcess(JNIEnv
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsProcess(JNIEnv
                                                              *env,
                                                              jobject obj, jint nsHandler,
                                                              jfloatArray spframe, jint num_bands,
@@ -60,7 +60,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_nsProcess(JNIEnv
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsFree(JNIEnv
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsFree(JNIEnv
                                                           *env,
                                                           jobject obj, jlong
                                                           nsHandler) {
@@ -73,13 +73,13 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_nsFree(JNIEnv
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxCreate(JNIEnv *env, jobject obj) {
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsxCreate(JNIEnv *env, jobject obj) {
     return (long) WebRtcNsx_Create();
 }
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxInit(JNIEnv *env, jobject obj, jlong nsHandler,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsxInit(JNIEnv *env, jobject obj, jlong nsHandler,
                                                            jint frequency
 ) {
     NsxHandle *handler = (NsxHandle *) nsHandler;
@@ -91,7 +91,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxInit(JNIEnv *env, jobject obj, jlong 
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxSetPolicy(JNIEnv
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsxSetPolicy(JNIEnv
                                                                 *env,
                                                                 jobject obj, jlong
                                                                 nsHandler,
@@ -106,7 +106,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxSetPolicy(JNIEnv
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxProcess(JNIEnv
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsxProcess(JNIEnv
                                                               *env,
                                                               jobject obj, jlong
                                                               nsHandler,
@@ -126,7 +126,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxProcess(JNIEnv
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxFree(JNIEnv *env, jobject obj, jlong nsHandler) {
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_nsxFree(JNIEnv *env, jobject obj, jlong nsHandler) {
     NsxHandle *handle = (NsxHandle *) nsHandler;
     if (handle == nullptr) {
         return -3;
@@ -137,12 +137,12 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_nsxFree(JNIEnv *env, jobject obj, jlong 
 
 
 JNIEXPORT jlong JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmCreate(JNIEnv *env, jobject obj) {
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_aecmCreate(JNIEnv *env, jobject obj) {
     return (jlong) WebRtcAecm_Create();
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmInit(JNIEnv *env,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_aecmInit(JNIEnv *env,
                                                             jobject obj, jlong aecmInst, jint sampFreq
 ) {
     void *_aecmInst = (void *) aecmInst;
@@ -152,7 +152,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmInit(JNIEnv *env,
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmFree(JNIEnv *env, jobject obj, jlong aecmInst) {
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_aecmFree(JNIEnv *env, jobject obj, jlong aecmInst) {
     void *_aecmInst = (void *) aecmInst;
     if (_aecmInst == nullptr)
         return -3;
@@ -161,7 +161,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmFree(JNIEnv *env, jobject obj, jlong
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmBufferFarend(JNIEnv *env, jobject obj,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_aecmBufferFarend(JNIEnv *env, jobject obj,
                                                                     jlong aecmInst,
                                                                     jshortArray farend, jint
                                                                     nrOfSamples) {
@@ -175,7 +175,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmBufferFarend(JNIEnv *env, jobject ob
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmProcess(JNIEnv
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_aecmProcess(JNIEnv
                                                                *env,
                                                                jobject obj, jlong
                                                                aecmInst,
@@ -205,7 +205,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmProcess(JNIEnv
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmSetConfig(JNIEnv *env, jobject obj, jlong aecmInst,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_aecmSetConfig(JNIEnv *env, jobject obj, jlong aecmInst,
                                                                  jobject config) {
     void *_aecmInst = (void *) aecmInst;
     if (_aecmInst == nullptr)
@@ -225,13 +225,13 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_aecmSetConfig(JNIEnv *env, jobject obj, 
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_agcCreate(JNIEnv *env, jobject obj) {
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_agcCreate(JNIEnv *env, jobject obj) {
     return (long) WebRtcAgc_Create();
 }
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_agcFree(JNIEnv *env, jobject obj, jlong agcInst) {
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_agcFree(JNIEnv *env, jobject obj, jlong agcInst) {
     void *_agcInst = (void *) agcInst;
     if (_agcInst == nullptr)
         return -3;
@@ -240,7 +240,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_agcFree(JNIEnv *env, jobject obj, jlong 
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_agcInit(JNIEnv *env,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_agcInit(JNIEnv *env,
                                                            jobject obj, jlong agcInst,
                                                            jint minLevel, jint maxLevel,
                                                            jint agcMode, jint fs) {
@@ -251,7 +251,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_agcInit(JNIEnv *env,
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_agcSetConfig(JNIEnv  *env, jobject obj, jlong agcInst,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_agcSetConfig(JNIEnv  *env, jobject obj, jlong agcInst,
                                                                 jobject config
 ) {
     void *_agcInst = (void *) agcInst;
@@ -275,7 +275,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_agcSetConfig(JNIEnv  *env, jobject obj, 
 }
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_agcProcess(JNIEnv *env, jobject obj, jlong agcInst,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_agcProcess(JNIEnv *env, jobject obj, jlong agcInst,
                                                               jshortArray inNear, jint num_bands,
                                                               jint samples, jshortArray out,
                                                               jint inMicLevel, jint outMicLevel,
@@ -294,7 +294,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_agcProcess(JNIEnv *env, jobject obj, jlo
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_agcAddFarend(JNIEnv *env, jobject obj, jlong agcInst,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_agcAddFarend(JNIEnv *env, jobject obj, jlong agcInst,
                                                                 jshortArray inFar, jint samples) {
     void *_agcInst = (void *) agcInst;
     if (_agcInst == nullptr)
@@ -307,7 +307,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_agcAddFarend(JNIEnv *env, jobject obj, j
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_agcAddMic(JNIEnv *env, jobject obj, jlong agcInst,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_agcAddMic(JNIEnv *env, jobject obj, jlong agcInst,
                                                              jshortArray inMic, jint num_bands, jint samples
 ) {
     void *_agcInst = (void *) agcInst;
@@ -321,7 +321,7 @@ Java_com_demo_ncnndemo_WebRTCAudioUtils_agcAddMic(JNIEnv *env, jobject obj, jlon
 
 
 JNIEXPORT jint JNICALL
-Java_com_demo_ncnndemo_WebRTCAudioUtils_agcVirtualMic(JNIEnv *env, jobject obj, jlong agcInst,
+Java_com_demo_ncnndemo_utils_WebRTCAudioUtils_agcVirtualMic(JNIEnv *env, jobject obj, jlong agcInst,
                                                                  jshortArray inMic, jint num_bands,
                                                                  jint samples, jint micLevelIn,
                                                                  jint micLevelOut

@@ -2,6 +2,7 @@ package com.demo.ncnndemo.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,7 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
     private ActivityChoseAudioFileClassifyBinding binding;
 
     private static final int PICK_AUDIO_REQUEST = 2;
+    private static final int REQUEST_APP_FILE_CODE = 1;  // 用于标识请求的常量
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +41,15 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
             // 启动文件选择器
-                pickAudioFile();
+//                pickAudioFile();
+                startAppFileChosenActivity();
             }
         });
+    }
+
+    private void startAppFileChosenActivity() {
+        Intent intent = new Intent(this, AppFileChosenActivity.class);
+        startActivityForResult(intent, REQUEST_APP_FILE_CODE);
     }
 
     private void pickAudioFile() {
@@ -62,6 +70,18 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
 
             // 在这里处理选中的音频文件
             handleSelectedAudio(selectedAudioUri);
+        } else if (requestCode == REQUEST_APP_FILE_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                // 处理返回的结果
+                if (data != null) {
+                    String fileUri = data.getStringExtra("file_uri");
+                    // 处理返回的数据
+                    Uri uri = Uri.parse(fileUri);
+                    handleSelectedAudio(uri);
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                // 处理用户取消的情况
+            }
         }
     }
 
