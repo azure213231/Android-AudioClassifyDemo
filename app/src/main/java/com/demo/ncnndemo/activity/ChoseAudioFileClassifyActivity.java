@@ -92,7 +92,7 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
             @Override
             public void run() {
                 binding.filePath.setText(audioUri.getPath());
-                double[] doubles = AudioUtils.loadAudioAsDoubleArray(bytes);
+                double[] doubles = AudioUtils.loadWavAudioAsDoubleArray(bytes);
                 try {
                     double decibels = AudioUtils.getAudioDb(doubles);
                     PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);

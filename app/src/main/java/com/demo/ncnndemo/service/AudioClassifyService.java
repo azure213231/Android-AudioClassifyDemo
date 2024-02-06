@@ -166,7 +166,8 @@ public class AudioClassifyService  extends Service {
 
                     // 合并从上次记录到现在录音数据
                     byte[] finalRecordedData = concatenateByteArrays(recordedDataList);
-                    double[] doubles = AudioUtils.bytesToDoubles(finalRecordedData);
+//                    double[] doublesDb = AudioUtils.convert32IntPCMToDoubleArray(finalRecordedData);
+                    double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(finalRecordedData,1);
 
 //                    AudioUtils.saveAudioClassifyWav(this,"test",doubles);
 

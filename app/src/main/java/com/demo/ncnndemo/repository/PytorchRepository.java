@@ -47,6 +47,8 @@ public class PytorchRepository {
 
     public AudioClassifyResult audioClassify(Context context,double[] audioAsFloatArray) throws Exception{
         try {
+            //归一化
+            AudioUtils.normalize(audioAsFloatArray);
             //初始化webrtc降噪
             WebRTCAudioUtils webRTCAudioUtils = new WebRTCAudioUtils();
             long nsxId = webRTCAudioUtils.nsxCreate();
@@ -74,6 +76,8 @@ public class PytorchRepository {
             double[] nsxAgcDoubleArray = ByteUtils.convertShortArrayToDoubleArray(nsxAgcShortArray);
 
             double[][][] feature = FilterBankProcessor.getFeature(nsxAgcDoubleArray);
+
+//            double[][][] feature = FilterBankProcessor.getFeature(audioAsFloatArray);
             // 将三维的 double 转换为 一维float
             float[] featureFloat = ByteUtils.convertToFloatArray(feature);
 

@@ -20,12 +20,16 @@ import java.util.Date;
 public class AudioUtils {
     private static final String TAG = "AudioUtils";
 
-    public static double[] loadAudioAsDoubleArray(byte[] audioData) {
+    /**
+     * 读取wav文件的byte后，先提取为浮点型，在进行分贝值的归一化（同python代码逻辑）
+     * */
+    public static double[] loadWavAudioAsDoubleArray(byte[] audioData) {
         try {
             //采样率
             Integer sampleRate = ByteUtils.getIntFromByte(audioData, 24, 4); // 获取采样率
 
             // 设置音频格式
+            Integer audioFormat  = ByteUtils.getIntFromByte(audioData, 20, 2);    // 编码格式
             //通道数
             Integer channelCount = ByteUtils.getIntFromByte(audioData, 22, 2);    // 声道数
             //位宽，每个采样点的bit数
@@ -44,29 +48,45 @@ public class AudioUtils {
             // 将音频数据转换为浮点数数组
             byte[] audioPcmData = new byte[frameSize * frameCount];
 //            double[] doubleArray = new double[frameCount];
-            // 计算实际需要复制的字节数
+//             计算实际需要复制的字节数
             int remainingBytes = audioData.length - 44; // 假设 44 是 WAV 文件头的大小
             int copyBytes = Math.min(remainingBytes, frameSize * frameCount);
             // 进行复制
             System.arraycopy(audioData, 44, audioPcmData, 0, copyBytes);
 
-            //编码格式0x01表示pcm
-            Integer audioFormat = ByteUtils.getIntFromByte(audioData, 20, 2);
-            //数据长度，单位字节
-            Integer dataSize = ByteUtils.getIntFromByte(audioData, 40, 4);
+            double[] doubles = new double[0];
+            if (audioFormat == 1){
+                doubles = convert32IntPCMToDoubleArray(audioPcmData);
+            } else if (audioFormat == 3){
+                doubles = convert32FloatPCMToDoubleArray(audioPcmData);
+            }
 
-            double[] doubleArray = AudioUtils.bytesToDoubles(audioPcmData);
-
-            //归一化
-            normalize(doubleArray,-20.0,300.0);
-            return doubleArray;
+            return doubles;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * 提取的音频方法与py中一致
+     * 32位深pcm的byte数组，先转化为浮点型，在进行归一化（同python）
+     * */
+    public static double[] pcmAudioByteArray2DoubleArray(byte[] audioPcmData,int audioFormat) {
+        try {
+            double[] doubles = new double[0];
+            if (audioFormat == 1){
+                doubles = convert32IntPCMToDoubleArray(audioPcmData);
+            } else if (audioFormat == 3){
+                doubles = convert32FloatPCMToDoubleArray(audioPcmData);
+            }
+
+            return doubles;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 提取的音频方法与py中一致(从assets中提取)
      * */
     public static double[] loadAudioAsDoubleArrayByAssets(Context context, String filename) {
         AssetFileDescriptor assetFileDescriptor = null;
@@ -96,6 +116,7 @@ public class AudioUtils {
             int frameCount = duration * sampleRate / 1000; // 计算帧数
 
             // 设置音频格式
+            Integer audioFormat  = ByteUtils.getIntFromByte(audioData, 20, 2);    // 音频数据的编码格式
             //通道数
             Integer channelCount = ByteUtils.getIntFromByte(audioData, 22, 2);    // 声道数
             //位宽，每个采样点的bit数
@@ -114,51 +135,127 @@ public class AudioUtils {
             // 进行复制
             System.arraycopy(audioData, 44, audioPcmData, 0, copyBytes);
 
-            //编码格式0x01表示pcm
-            Integer audioFormat = ByteUtils.getIntFromByte(audioData, 20, 2);
             //数据长度，单位字节
             Integer dataSize = ByteUtils.getIntFromByte(audioData, 40, 4);
 
-            for (int i = 0; i < frameCount; i++) {
-                float value = bytesToFloat(audioPcmData, i * frameSize);
-                floatArray[i] = value;
+            double[] doubles = new double[0];
+            if (audioFormat == 1){
+                doubles = convert32IntPCMToDoubleArray(audioPcmData);
+            } else if (audioFormat == 3){
+                doubles = convert32FloatPCMToDoubleArray(audioPcmData);
             }
 
-            //归一化
-            normalize(floatArray,-20.0,300.0);
-            return floatArray;
+            return doubles;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    private static void normalize(double[] audioData, double targetDb, double maxGainDb) {
-        if (Double.isInfinite(rmsDb(audioData))) return;
 
-        double gain = targetDb - rmsDb(audioData);
+    /**
+     * 32位整型编码格式的byte[]转化为double[]
+     * */
+    private static double[] convert32IntPCMToDoubleArray(byte[] pcmBytes) {
+        int numSamples = pcmBytes.length / 4; // Assuming 32-bit PCM (4 bytes per sample)
+        double[] pcmDoubles = new double[numSamples];
+
+        ByteBuffer buffer = ByteBuffer.wrap(pcmBytes);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+        for (int i = 0; i < numSamples; i++) {
+            int pcmValue = buffer.getInt();
+            double pcmDouble = pcmValue / (double) Integer.MAX_VALUE;
+            pcmDoubles[i] = pcmDouble;
+        }
+
+        return pcmDoubles;
+    }
+
+    /**
+     * 32位浮点型编码格式的byte[]转化为double[]
+     * */
+    private static double[] convert32FloatPCMToDoubleArray(byte[] pcmBytes) {
+        int bytesPerSample = 4;  // 32位PCM，每个样本占4字节
+        int sampleCount = pcmBytes.length / bytesPerSample;
+        double[] doubleArray = new double[sampleCount];
+
+        for (int i = 0; i < sampleCount; i++) {
+            // 从byte数组中读取每个样本的值
+            int sampleValue = byteArrayToInt(pcmBytes, i * bytesPerSample);
+
+            float v = Float.intBitsToFloat(sampleValue);
+            doubleArray[i] = v;
+        }
+
+        return doubleArray;
+    }
+
+    /**
+     * 归一化
+     * */
+    public static void normalize(double[] samples, double targetDb, double maxGainDb) throws IllegalArgumentException {
+        double rmsDb = getRmsDb(samples);
+        if (Double.NEGATIVE_INFINITY == rmsDb) {
+            return;
+        }
+
+        double gain = targetDb - rmsDb;
 
         if (gain > maxGainDb) {
-            throw new IllegalArgumentException(String.format(
-                    "Cannot normalize segment to %f dB because the potential gain exceeds maxGainDb (%f dB)",
-                    targetDb, maxGainDb));
+            throw new IllegalArgumentException("无法将段规范化到 " + targetDb + " dB，因为可能的增益已经超过maxGainDb (" + maxGainDb + " dB)");
         }
 
-        gainDb(audioData,Math.min(maxGainDb, targetDb - rmsDb(audioData)));
+        gainDb(samples,Math.min(maxGainDb, targetDb - rmsDb));
     }
 
-    private static void gainDb(double[] samples, double gain) {
-        double linearGain = Math.pow(10, gain / 20.0);
+    /**
+     * 归一化
+     * */
+    public static void normalize(double[] samples) throws IllegalArgumentException {
+        double targetDb = -20.0;
+        double maxGainDb = 300.0;
+        double rmsDb = getRmsDb(samples);
+        if (Double.NEGATIVE_INFINITY == rmsDb) {
+            return;
+        }
+
+        double gain = targetDb - rmsDb;
+
+        if (gain > maxGainDb) {
+            throw new IllegalArgumentException("无法将段规范化到 " + targetDb + " dB，因为可能的增益已经超过maxGainDb (" + maxGainDb + " dB)");
+        }
+
+        gainDb(samples,Math.min(maxGainDb, targetDb - rmsDb));
+    }
+
+    public static void gainDb(double[] samples, double gain) {
         for (int i = 0; i < samples.length; i++) {
-            samples[i] *= linearGain;
+            samples[i] *= Math.pow(10, gain / 20.0);
         }
     }
+    public static double getRmsDb(double[] samples) {
+        double meanSquare = calculateMeanSquare(samples);
 
-    private static double rmsDb(double[] samples) {
-        double sum = 0;
-        for (double sample : samples) {
-            sum += sample * sample;
+        // Check for NaN and return a default value or handle appropriately
+        if (Double.isNaN(meanSquare)) {
+            // Handle NaN case, e.g., return a default value
+            return 0.0;
         }
-        double rms = Math.sqrt(sum / samples.length);
-        return 20.0 * Math.log10(rms);
+
+        return 10 * Math.log10(meanSquare);
+    }
+
+    private static double calculateMeanSquare(double[] samples) {
+        double sumSquare = Arrays.stream(samples)
+                .map(x -> Math.pow(x, 2))
+                .sum();
+
+        // Check for zero division
+        if (samples.length == 0) {
+            // Handle division by zero, e.g., return a default value
+            return 0.0;
+        }
+
+        return sumSquare / samples.length;
     }
 
     private static float bytesToFloat(byte[] bytes, int offset) {
@@ -167,19 +264,6 @@ public class AudioUtils {
             value |= (bytes[offset + i] & 0xFF) << (i * 8);
         }
         return Float.intBitsToFloat(value);
-    }
-
-    private static int getBytesPerSample(int encoding) {
-        switch (encoding) {
-            case AudioFormat.ENCODING_PCM_8BIT:
-                return 1;
-            case AudioFormat.ENCODING_PCM_16BIT:
-                return 2;
-            case AudioFormat.ENCODING_PCM_FLOAT:
-                return 4;
-            default:
-                return 2; // 默认为16位PCM
-        }
     }
 
     public static void saveAudioClassifyWav(Context context,String classify,double[] audioData){
@@ -221,7 +305,7 @@ public class AudioUtils {
     }
 
     /**
-     * 保存音频
+     * 保存音频(编码格式为32位整型)
      * */
     public static void saveDoubleArrayAsWav(double[] pcmData, String outputFilePath) {
         int SAMPLE_RATE = 16000;
@@ -323,26 +407,6 @@ public class AudioUtils {
          Arrays.fill(paddedArray, originalLength, newLength, (short) 0);
 
         return paddedArray;
-    }
-
-    // 将byte数组转换为double数组
-    public static double[] bytesToDoubles(byte[] byteArray) {
-        int bytesPerSample = 4;  // 32位PCM，每个样本占4字节
-        int sampleCount = byteArray.length / bytesPerSample;
-        double[] doubleArray = new double[sampleCount];
-
-        for (int i = 0; i < sampleCount; i++) {
-            // 从byte数组中读取每个样本的值
-            int sampleValue = byteArrayToInt(byteArray, i * bytesPerSample);
-
-            // 将样本值映射到 -1.0 到 1.0 范围
-            double normalizedValue = sampleValue / (double) Integer.MAX_VALUE;  // 32位有符号整数的范围
-
-            // 存储到double数组中
-            doubleArray[i] = normalizedValue;
-        }
-
-        return doubleArray;
     }
 
     public static double getAudioDb(double[] doubles){

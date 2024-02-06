@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+//选择APP内的文件，并返回Uri
 public class AppFileChosenActivity extends AppCompatActivity {
 
     ActivityAppFileChoosenBinding binding;

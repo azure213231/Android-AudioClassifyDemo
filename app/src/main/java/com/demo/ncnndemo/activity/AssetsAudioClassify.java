@@ -40,7 +40,8 @@ public class AssetsAudioClassify extends AppCompatActivity {
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
 
-            String fileName = "dogTest-0001.wav";
+//            String fileName = "dogTest-0001.wav";
+            String fileName = "023500.wav";
             double[] audioAsFloatArray = AudioUtils.loadAudioAsDoubleArrayByAssets( this,"audio/" + fileName);
             PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),audioAsFloatArray);
 

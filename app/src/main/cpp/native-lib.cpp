@@ -7,7 +7,7 @@
 #include <iostream>
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_demo_ncnndemo_NCNNUtils_stringFromJNI(
+Java_com_demo_ncnndemo_utils_NCNNUtils_stringFromJNI(
         JNIEnv* env,
         jclass clazz) {
     std::string hello = "Hello from C++";
@@ -15,7 +15,7 @@ Java_com_demo_ncnndemo_NCNNUtils_stringFromJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_demo_ncnndemo_NCNNUtils_loadModel(JNIEnv *env, jclass clazz, jobject assetManager, jfloatArray audio_data) {
+Java_com_demo_ncnndemo_utils_NCNNUtils_loadModel(JNIEnv *env, jclass clazz, jobject assetManager, jfloatArray audio_data) {
 
     // 加载声音分类模型
     AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
