@@ -190,17 +190,7 @@ public class AudioClassifyService  extends Service {
                                     PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
                                     sendBorderCast("classifyResult",audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
 
-                                    if (decibels > 45){
-                                        //识别率90%以上按照识别结果保存
-                                        if (audioClassifyResult.getScore() > 0.95){
-                                            AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
-                                        } else {
-                                            //声音很大，但是识别结果都不匹配
-                                            if (decibels > 60){
-                                                AudioUtils.saveAudioClassifyWav(getApplicationContext(),"unknown",doubles);
-                                            }
-                                        }
-                                    }
+                                    AudioUtils.saveAudioClassifyWav(getApplicationContext(),"audioClassify",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
                                 } catch (Exception e) {
                                     ToastUtil.showToast(getApplicationContext(),"分析失败: " + e.getMessage());
                                 }

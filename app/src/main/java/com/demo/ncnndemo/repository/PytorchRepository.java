@@ -130,17 +130,7 @@ public class PytorchRepository {
 
             //分贝数
             double decibels = AudioUtils.getAudioDb(audioAsFloatArray);
-            if (decibels > 45){
-                //识别率90%以上按照识别结果保存
-                if (audioClassifyResult.getScore() > 0.95){
-                    AudioUtils.saveAudioClassifyNSXWav(context,audioClassifyResult.getLabel(),nsxAgcDoubleArray);
-                } else {
-                    //声音很大，但是识别结果都不匹配
-                    if (decibels > 60){
-                        AudioUtils.saveAudioClassifyNSXWav(context,"unknown",nsxAgcDoubleArray);
-                    }
-                }
-            }
+            AudioUtils.saveAudioClassifyWav(context,"audioClassifyNSX",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),nsxAgcDoubleArray);
 
             return audioClassifyResult;
         }catch (Exception e){
