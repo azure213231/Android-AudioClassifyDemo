@@ -2,12 +2,15 @@ package com.demo.ncnndemo.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.view.Gravity;
 import android.view.View;
 
@@ -20,12 +23,12 @@ import com.demo.ncnndemo.utils.ToastUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
 
@@ -36,6 +39,7 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
     private static final int HEADER_SIZE = 44; // WAV文件头部大小
     private static final int CHUNK_SIZE = 300 * 1024; // 每个块的大小，320KB
     private static Integer audioFormat = 1;
+    private Map<String, Integer> resultCountMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,69 +101,112 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
     }
 
     private void handleSelectedAudio(Uri audioUri) {
-//        byte[] bytes = readBytesFromUri(this, audioUri);
         try {
             List<byte[]> byteChunks = readAndChunkWavFile(this, audioUri, CHUNK_SIZE);
+            resultCountMap.clear();
             binding.filePath.setText(audioUri.getPath());
-            binding.classifyResult.setText("识别中");
+            binding.classifyStatus.setText("识别中");
+            String fileName = removeExtension(getFileNameFromUri(this, audioUri));
 
             if (byteChunks.size() < 1){
                 ToastUtil.showToast(this,"文件长度不足5秒", Gravity.CENTER);
-                return;
             } else if (byteChunks.size() == 1) {//文件长度为10秒以内
-                ThreadPool.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < byteChunks.size(); i++){
-                            byte[] bytes = new byte[CHUNK_SIZE];
-                            System.arraycopy(byteChunks.get(i),0,bytes,0,CHUNK_SIZE);
-//                        double[] doubles = AudioUtils.loadWavAudioAsDoubleArray(bytes);
-                            double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(bytes, audioFormat);
-                            try {
-                                double decibels = AudioUtils.getAudioDb(doubles);
-                                PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
-//                                AudioUtils.saveAudioClassifyWav(getApplicationContext(),"ChoseFile",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
-                                binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
-                                binding.dbResult.setText("dB: " + decibels);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    }
-                });
+                handleLT10SecondByteArray(byteChunks);
             } else {//文件长度大于10秒
-                ThreadPool.runOnThread(new Runnable() {
-                    @Override
-                    public void run() {
-//                    binding.filePath.setText(audioUri.getPath());
-                        for (int i = 0; i < byteChunks.size(); i++){
-                            byte[] bytes = new byte[CHUNK_SIZE];
-                            System.arraycopy(byteChunks.get(i),0,bytes,0,CHUNK_SIZE);
-//                        double[] doubles = AudioUtils.loadWavAudioAsDoubleArray(bytes);
-                            double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(bytes, audioFormat);
-                            try {
-                                double decibels = AudioUtils.getAudioDb(doubles);
-                                PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
-                                AudioUtils.saveAudioClassifyWav(getApplicationContext(),"PSGClassify",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
-//                            binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
-//                            binding.dbResult.setText("dB: " + decibels);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        binding.classifyResult.setText("识别完成");
-                    }
-                });
+                handleGT10SecondByteArray(byteChunks,fileName);
             }
-
-
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
+    }
 
+    /**
+     *  大于10秒的数据的处理逻辑
+     * */
+    private void handleGT10SecondByteArray(List<byte[]> byteChunks, String fileName) {
+        ThreadPool.runOnThread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < byteChunks.size(); i++){
+                    byte[] bytes = new byte[CHUNK_SIZE];
+                    System.arraycopy(byteChunks.get(i),0,bytes,0,CHUNK_SIZE);
+                    double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(bytes, audioFormat);
+                    try {
+                        double decibels = AudioUtils.getAudioDb(doubles);
+                        //识别结果
+                        PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
+                        //统计结果
+                        StatisticalAudioClassifyResult(audioClassifyResult);
+                        //保存音频
+                        AudioUtils.saveAudioClassifyWav(getApplicationContext(),"PSGClassify/"+fileName,audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
+                        ThreadPool.runOnMainThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
+                                binding.dbResult.setText("dB: " + decibels);
+                            }
+                        });
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
 
+                //处理完所有文件
+                ThreadPool.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        binding.classifyStatus.setText("识别完成（结果保存在APP目录PSGClassify下）");
+                        String classifyResult = "";
+                        // 打印结果数量
+                        for (Map.Entry<String, Integer> entry : resultCountMap.entrySet()) {
+                            classifyResult += entry.getKey() + ", Count: " + entry.getValue() + "\n";
+                            binding.classifyResult.setText(classifyResult);
+                            binding.dbResult.setText("");
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void StatisticalAudioClassifyResult(PytorchRepository.AudioClassifyResult audioClassifyResult) {
+        String result = audioClassifyResult.getLabel();
+        if (resultCountMap.containsKey(result)) {
+            int count = resultCountMap.get(result);
+            resultCountMap.put(result, count + 1);
+        } else {
+            resultCountMap.put(result, 1);
+        }
+    }
+
+    /**
+     * 10秒以内数据的处理逻辑
+     * */
+    private void handleLT10SecondByteArray(List<byte[]> byteChunks) {
+        ThreadPool.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < byteChunks.size(); i++){
+                    byte[] bytes = new byte[CHUNK_SIZE];
+                    System.arraycopy(byteChunks.get(i),0,bytes,0,CHUNK_SIZE);
+                    double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(bytes, audioFormat);
+                    try {
+                        double decibels = AudioUtils.getAudioDb(doubles);
+                        PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
+                        //不保存音频数据
+                        //AudioUtils.saveAudioClassifyWav(getApplicationContext(),"ChoseFile",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
+                        binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
+                        binding.dbResult.setText("dB: " + decibels);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                //处理完所有文件
+                binding.classifyStatus.setText("识别完成");
+            }
+        });
     }
 
     public static List<byte[]> readAndChunkWavFile(Context context, Uri fileUri, int chunkSize) throws IOException {
@@ -196,28 +243,37 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
         }
     }
 
-
-    public static byte[] readBytesFromUri(Context context, Uri fileUri) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        try {
+    @SuppressLint("Range")
+    public static String getFileNameFromUri(Context context, Uri uri) {
+        String fileName = null;
+        if (uri.getScheme().equals("content")) {
             ContentResolver contentResolver = context.getContentResolver();
-            InputStream inputStream = contentResolver.openInputStream(fileUri);
-
-            if (inputStream != null) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    byteArrayOutputStream.write(buffer, 0, bytesRead);
+            Cursor cursor = contentResolver.query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
-
-                inputStream.close();
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else if (uri.getScheme().equals("file")) {
+            fileName = uri.getLastPathSegment();
         }
+        return fileName;
+    }
 
-        return byteArrayOutputStream.toByteArray();
+    public static String removeExtension(String fileName) {
+        if (fileName == null) {
+            return null;
+        }
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            // 文件名中没有找到"."，不包含后缀
+            return fileName;
+        }
+        // 返回文件名中"."之前的部分
+        return fileName.substring(0, lastDotIndex);
     }
 }

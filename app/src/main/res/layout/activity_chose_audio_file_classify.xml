@@ -34,7 +34,15 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         android:gravity="center">
-
+        <TextView
+            android:id="@+id/classify_status"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="20dp"
+            android:textColor="@color/black"
+            android:text="classify_status"/>
         <TextView
             android:id="@+id/classify_result"
             android:layout_height="wrap_content"
