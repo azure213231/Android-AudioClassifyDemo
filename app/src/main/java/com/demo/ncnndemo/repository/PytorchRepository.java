@@ -15,6 +15,8 @@ import org.pytorch.IValue;
 import org.pytorch.Module;
 import org.pytorch.Tensor;
 
+import java.util.Arrays;
+
 public class PytorchRepository {
     private static volatile PytorchRepository instance;
 
@@ -47,14 +49,13 @@ public class PytorchRepository {
 
     public AudioClassifyResult audioClassify(Context context,double[] audioAsFloatArray) throws Exception{
         try {
-            //归一化
-            AudioUtils.normalize(audioAsFloatArray);
             //初始化webrtc降噪
             WebRTCAudioUtils webRTCAudioUtils = new WebRTCAudioUtils();
             long nsxId = webRTCAudioUtils.nsxCreate();
             webRTCAudioUtils.nsxInit(nsxId,16000);
             webRTCAudioUtils.nsxSetPolicy(nsxId,2);
 
+            //webRtc自动增益
             long agcInst = webRTCAudioUtils.agcCreate();
             webRTCAudioUtils.agcInit(agcInst, 0, 255, 2, 16000);
             webRTCAudioUtils.agcSetConfig(agcInst, webRTCAudioUtils.getAgcConfig((short) 3, (short) 75, true));
@@ -75,6 +76,8 @@ public class PytorchRepository {
             }
             double[] nsxAgcDoubleArray = ByteUtils.convertShortArrayToDoubleArray(nsxAgcShortArray);
 
+            //使用分贝数对音频归一化（包含增益）
+//            normalize(nsxAgcDoubleArray);
             double[][][] feature = FilterBankProcessor.getFeature(nsxAgcDoubleArray);
 
 //            double[][][] feature = FilterBankProcessor.getFeature(audioAsFloatArray);
@@ -127,13 +130,13 @@ public class PytorchRepository {
 
             //分贝数
             double decibels = AudioUtils.getAudioDb(audioAsFloatArray);
-            if (decibels > 35){
+            if (decibels > 45){
                 //识别率90%以上按照识别结果保存
                 if (audioClassifyResult.getScore() > 0.95){
                     AudioUtils.saveAudioClassifyNSXWav(context,audioClassifyResult.getLabel(),nsxAgcDoubleArray);
                 } else {
                     //声音很大，但是识别结果都不匹配
-                    if (decibels > 50){
+                    if (decibels > 60){
                         AudioUtils.saveAudioClassifyNSXWav(context,"unknown",nsxAgcDoubleArray);
                     }
                 }
@@ -146,6 +149,56 @@ public class PytorchRepository {
         }
     }
 
+    /**
+     * 归一化
+     * */
+    private static void normalize(double[] samples) throws IllegalArgumentException {
+        double targetDb = -20.0;
+        double maxGainDb = 300.0;
+        double rmsDb = getRmsDb(samples);
+        if (Double.NEGATIVE_INFINITY == rmsDb) {
+            return;
+        }
+
+        double gain = targetDb - rmsDb;
+
+        if (gain > maxGainDb) {
+            throw new IllegalArgumentException("无法将段规范化到 " + targetDb + " dB，因为可能的增益已经超过maxGainDb (" + maxGainDb + " dB)");
+        }
+
+        gainDb(samples,Math.min(maxGainDb, targetDb - rmsDb));
+    }
+
+    private static void gainDb(double[] samples, double gain) {
+        for (int i = 0; i < samples.length; i++) {
+            samples[i] *= Math.pow(10, gain / 20.0);
+        }
+    }
+    private static double getRmsDb(double[] samples) {
+        double meanSquare = calculateMeanSquare(samples);
+
+        // Check for NaN and return a default value or handle appropriately
+        if (Double.isNaN(meanSquare)) {
+            // Handle NaN case, e.g., return a default value
+            return 0.0;
+        }
+
+        return 10 * Math.log10(meanSquare);
+    }
+
+    private static double calculateMeanSquare(double[] samples) {
+        double sumSquare = Arrays.stream(samples)
+                .map(x -> Math.pow(x, 2))
+                .sum();
+
+        // Check for zero division
+        if (samples.length == 0) {
+            // Handle division by zero, e.g., return a default value
+            return 0.0;
+        }
+
+        return sumSquare / samples.length;
+    }
 
 
     // Softmax 函数的实现

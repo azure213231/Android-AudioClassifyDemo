@@ -169,8 +169,6 @@ public class AudioClassifyService  extends Service {
 //                    double[] doublesDb = AudioUtils.convert32IntPCMToDoubleArray(finalRecordedData);
                     double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(finalRecordedData,1);
 
-//                    AudioUtils.saveAudioClassifyWav(this,"test",doubles);
-
                     recordedDataList.clear();
                     lastRecordTimeStamp = System.currentTimeMillis();
 
@@ -192,13 +190,13 @@ public class AudioClassifyService  extends Service {
                                     PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
                                     sendBorderCast("classifyResult",audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
 
-                                    if (decibels > 35){
+                                    if (decibels > 45){
                                         //识别率90%以上按照识别结果保存
                                         if (audioClassifyResult.getScore() > 0.95){
                                             AudioUtils.saveAudioClassifyWav(getApplicationContext(),audioClassifyResult.getLabel(),doubles);
                                         } else {
                                             //声音很大，但是识别结果都不匹配
-                                            if (decibels > 50){
+                                            if (decibels > 60){
                                                 AudioUtils.saveAudioClassifyWav(getApplicationContext(),"unknown",doubles);
                                             }
                                         }

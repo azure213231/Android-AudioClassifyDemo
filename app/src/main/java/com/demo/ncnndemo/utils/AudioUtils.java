@@ -68,7 +68,7 @@ public class AudioUtils {
     }
 
     /**
-     * 32位深pcm的byte数组，先转化为浮点型，在进行归一化（同python）
+     * 32位深pcm的byte数组，转化为浮点型（同python）
      * */
     public static double[] pcmAudioByteArray2DoubleArray(byte[] audioPcmData,int audioFormat) {
         try {
@@ -189,74 +189,24 @@ public class AudioUtils {
         return doubleArray;
     }
 
-    /**
-     * 归一化
-     * */
-    public static void normalize(double[] samples, double targetDb, double maxGainDb) throws IllegalArgumentException {
-        double rmsDb = getRmsDb(samples);
-        if (Double.NEGATIVE_INFINITY == rmsDb) {
-            return;
-        }
+//    /**
+//     * 归一化
+//     * */
+//    public static void normalize(double[] samples, double targetDb, double maxGainDb) throws IllegalArgumentException {
+//        double rmsDb = getRmsDb(samples);
+//        if (Double.NEGATIVE_INFINITY == rmsDb) {
+//            return;
+//        }
+//
+//        double gain = targetDb - rmsDb;
+//
+//        if (gain > maxGainDb) {
+//            throw new IllegalArgumentException("无法将段规范化到 " + targetDb + " dB，因为可能的增益已经超过maxGainDb (" + maxGainDb + " dB)");
+//        }
+//
+//        gainDb(samples,Math.min(maxGainDb, targetDb - rmsDb));
+//    }
 
-        double gain = targetDb - rmsDb;
-
-        if (gain > maxGainDb) {
-            throw new IllegalArgumentException("无法将段规范化到 " + targetDb + " dB，因为可能的增益已经超过maxGainDb (" + maxGainDb + " dB)");
-        }
-
-        gainDb(samples,Math.min(maxGainDb, targetDb - rmsDb));
-    }
-
-    /**
-     * 归一化
-     * */
-    public static void normalize(double[] samples) throws IllegalArgumentException {
-        double targetDb = -20.0;
-        double maxGainDb = 300.0;
-        double rmsDb = getRmsDb(samples);
-        if (Double.NEGATIVE_INFINITY == rmsDb) {
-            return;
-        }
-
-        double gain = targetDb - rmsDb;
-
-        if (gain > maxGainDb) {
-            throw new IllegalArgumentException("无法将段规范化到 " + targetDb + " dB，因为可能的增益已经超过maxGainDb (" + maxGainDb + " dB)");
-        }
-
-        gainDb(samples,Math.min(maxGainDb, targetDb - rmsDb));
-    }
-
-    public static void gainDb(double[] samples, double gain) {
-        for (int i = 0; i < samples.length; i++) {
-            samples[i] *= Math.pow(10, gain / 20.0);
-        }
-    }
-    public static double getRmsDb(double[] samples) {
-        double meanSquare = calculateMeanSquare(samples);
-
-        // Check for NaN and return a default value or handle appropriately
-        if (Double.isNaN(meanSquare)) {
-            // Handle NaN case, e.g., return a default value
-            return 0.0;
-        }
-
-        return 10 * Math.log10(meanSquare);
-    }
-
-    private static double calculateMeanSquare(double[] samples) {
-        double sumSquare = Arrays.stream(samples)
-                .map(x -> Math.pow(x, 2))
-                .sum();
-
-        // Check for zero division
-        if (samples.length == 0) {
-            // Handle division by zero, e.g., return a default value
-            return 0.0;
-        }
-
-        return sumSquare / samples.length;
-    }
 
     private static float bytesToFloat(byte[] bytes, int offset) {
         int value = 0;
