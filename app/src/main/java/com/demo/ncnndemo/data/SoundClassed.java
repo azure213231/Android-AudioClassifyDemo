@@ -3,9 +3,10 @@ package com.demo.ncnndemo.data;
 public class SoundClassed {
     public static String[] CLASSES = new String[]{
             "bird",
-            "cat",
+//            "cat",
             "chicken",
-            "dog",
+            "cough",
+//            "dog",
             "dreamTalk",
             "footstep",
             "knock_door",

@@ -7,6 +7,8 @@ import android.media.AudioFormat;
 import android.media.MediaPlayer;
 import android.util.Log;
 
+import com.demo.ncnndemo.data.SoundClassed;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -220,36 +222,42 @@ public class AudioUtils {
      * 按照分贝、评分来保存
      * */
     public static void saveAudioClassifyWav(Context context,String fileName,String classify,double decibels,double score,double[] audioData){
-        if (decibels > 45){
-            //识别率90%以上按照识别结果保存
-            if (score > 0.95){
-                AudioUtils.saveAudioClassifyWav(context,fileName,classify,audioData);
-            } else {
-                //声音很大，但是识别结果都不匹配
-                if (decibels > 60){
-                    AudioUtils.saveAudioClassifyWav(context,fileName,"unknown",audioData);
+//        if(fileName.equals("audioClassifyNSX")){
+//            AudioUtils.saveAudioClassifyWav(context,fileName,classify,audioData);
+//            return;
+//        }
+        if (classify.equals("snore")){
+            if (decibels > 45){
+                //识别率90%以上按照识别结果保存
+                if (score > 0.98){
+                    AudioUtils.saveAudioClassifyWav(context,fileName,classify,audioData);
+                }
+            }
+        } else if(classify.equals("dreamTalk")){
+            if (decibels > 40){
+                //识别率90%以上按照识别结果保存
+                if (score > 0.98){
+                    AudioUtils.saveAudioClassifyWav(context,fileName,classify,audioData);
+                }
+            }
+        } else {
+            if (decibels > 50){
+                //识别率90%以上按照识别结果保存
+                if (score > 0.90){
+                    AudioUtils.saveAudioClassifyWav(context,fileName,classify,audioData);
+                } else {
+                    //声音很大，但是识别结果都不匹配
+                    if (decibels > 60){
+                        AudioUtils.saveAudioClassifyWav(context,fileName,"unknown",audioData);
+                    }
                 }
             }
         }
     }
 
-//    public static void saveAudioClassifyNSXWav(Context context,String classify,double decibels,double score,double[] audioData){
-//        if (decibels > 45){
-//            //识别率90%以上按照识别结果保存
-//            if (score > 0.95){
-//                AudioUtils.saveAudioClassifyWav(context,"audioClassifyNSX",classify,audioData);
-//            } else {
-//                //声音很大，但是识别结果都不匹配
-//                if (decibels > 60){
-//                    AudioUtils.saveAudioClassifyWav(context,"audioClassifyNSX","unknown",audioData);
-//                }
-//            }
-//        }
-//    }
-
     private static void saveAudioClassifyWav(Context context,String fileName,String classify,double[] audioData){
         SimpleDateFormat daySdf = new SimpleDateFormat("yyyy-MM-dd");//yyyy-MM-dd HH:mm:ss
-        SimpleDateFormat secondSdf = new SimpleDateFormat("HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+        SimpleDateFormat secondSdf = new SimpleDateFormat("HH:mm:ss:SSS");//yyyy-MM-dd HH:mm:ss
 
         long currentTimeMillis = System.currentTimeMillis();
         long twentySleepTimestampOfDay = DateUtils.getTwentySleepTimestampOfDay(currentTimeMillis);
@@ -265,25 +273,6 @@ public class AudioUtils {
         Log.e("TAG", "run: "+savePath );
         AudioUtils.saveDoubleArrayAsWav(audioData,savePath);
     }
-
-//    private static void saveAudioClassifyNSXWav(Context context,String classify,double[] audioData){
-//        SimpleDateFormat daySdf = new SimpleDateFormat("yyyy-MM-dd");//yyyy-MM-dd HH:mm:ss
-//        SimpleDateFormat secondSdf = new SimpleDateFormat("HH:mm:ss");//yyyy-MM-dd HH:mm:ss
-//
-//        long currentTimeMillis = System.currentTimeMillis();
-//        long twentySleepTimestampOfDay = DateUtils.getTwentySleepTimestampOfDay(currentTimeMillis);
-//
-//        Date date = new Date(twentySleepTimestampOfDay);
-//        String day = daySdf.format(date);
-//
-//        Date currentDate = new Date(currentTimeMillis);
-//        String second = secondSdf.format(currentDate);
-//
-//        String savePath = context.getExternalFilesDir(null).getAbsolutePath() + File.separator + "audioClassifyNSX" + File.separator
-//                + day + File.separator + classify + File.separator + second + ".wav";
-//        Log.e("TAG", "run: "+savePath );
-//        AudioUtils.saveDoubleArrayAsWav(audioData,savePath);
-//    }
 
     /**
      * 保存音频(编码格式为32位整型)

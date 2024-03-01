@@ -15,11 +15,22 @@ import org.pytorch.IValue;
 import org.pytorch.Module;
 import org.pytorch.Tensor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class PytorchRepository {
     private static volatile PytorchRepository instance;
-
+    private WebRTCAudioUtils webRTCAudioUtils;
+    //降噪，然后增益，循环次数
+    private Integer agcAndNsxNum = 1;
+    private Integer agcInstListNum = 1;
+    private static List<Long> agcInstList = new ArrayList<>();
+    private Integer nsxInstListNum = 1;
+    private static List<Long> nsxInstList = new ArrayList<>();
+    //降噪后增益次数
+    private Integer nsxInstList2Num = 1;
+    private static List<Long> nsxInstList2 = new ArrayList<>();
     private PytorchRepository() {
     }
 
@@ -40,7 +51,7 @@ public class PytorchRepository {
 
     public boolean init(Context context) throws Exception{
         try {
-            module = Module.load(assetFilePath(context, "fbank-model.pt"));
+            module = Module.load(assetFilePath(context, "fbank-model20240228.pt"));
             return true;
         } catch (Exception e){
             throw new Exception(e);
@@ -50,15 +61,18 @@ public class PytorchRepository {
     public AudioClassifyResult audioClassify(Context context,double[] audioAsFloatArray) throws Exception{
         try {
             //初始化webrtc降噪
-            WebRTCAudioUtils webRTCAudioUtils = new WebRTCAudioUtils();
-            long nsxId = webRTCAudioUtils.nsxCreate();
-            webRTCAudioUtils.nsxInit(nsxId,16000);
-            webRTCAudioUtils.nsxSetPolicy(nsxId,2);
-
-            //webRtc自动增益
-            long agcInst = webRTCAudioUtils.agcCreate();
-            webRTCAudioUtils.agcInit(agcInst, 0, 255, 2, 16000);
-            webRTCAudioUtils.agcSetConfig(agcInst, webRTCAudioUtils.getAgcConfig((short) 3, (short) 75, true));
+            if (webRTCAudioUtils == null){
+                webRTCAudioUtils = new WebRTCAudioUtils();
+            }
+            webRTCCreate();
+//            long nsxId = webRTCAudioUtils.nsxCreate();
+//            webRTCAudioUtils.nsxInit(nsxId,16000);
+//            webRTCAudioUtils.nsxSetPolicy(nsxId,2);
+//
+//            //webRtc自动增益
+//            long agcInst = webRTCAudioUtils.agcCreate();
+//            webRTCAudioUtils.agcInit(agcInst, 0, 255, 2, 16000);
+//            webRTCAudioUtils.agcSetConfig(agcInst, webRTCAudioUtils.getAgcConfig((short) 3, (short) 75, true));
 
             Integer shortSize = 160;
             short[] shortArray = ByteUtils.convertDoubleArrayToShortArray(audioAsFloatArray);
@@ -70,9 +84,32 @@ public class PytorchRepository {
             for (int i = 0; i < splitShortArray.length; i++){
                 short[] outNsxData = new short[shortSize];
                 short[] outAgcData = new short[shortSize];
-                webRTCAudioUtils.nsxProcess(nsxId,splitShortArray[i],1,outNsxData);
-                webRTCAudioUtils.agcProcess(agcInst, outNsxData, 1, 160, outAgcData, 0, 0, 0, false);
-                System.arraycopy(outAgcData,0,nsxAgcShortArray,i*shortSize,shortSize);
+                short[] tempData = new short[shortSize];
+                System.arraycopy(splitShortArray[i],0,tempData,0,shortSize);
+
+//                for (long nsxInst : nsxInstList){
+//                    webRTCAudioUtils.nsxProcess(nsxInst,tempData,1,outNsxData);
+//                    tempData = outNsxData;
+//                }
+//
+//                for (long agcInst : agcInstList){
+//                    webRTCAudioUtils.agcProcess(agcInst, tempData, 1, 160, outAgcData, 0, 0, 0, false);
+//                    tempData = outAgcData;
+//                }
+//
+//                for (long nsxInst2 : nsxInstList2){
+//                    webRTCAudioUtils.nsxProcess(nsxInst2,tempData,1,outNsxData);
+//                    tempData = outNsxData;
+//                }
+
+                for (int j = 0; j < agcAndNsxNum; j++){
+                    webRTCAudioUtils.nsxProcess(nsxInstList.get(j),tempData,1,outNsxData);
+                    tempData = outNsxData;
+
+                    webRTCAudioUtils.agcProcess(agcInstList.get(j), tempData, 1, 160, outAgcData, 0, 0, 0, false);
+                    tempData = outAgcData;
+                }
+                System.arraycopy(tempData,0,nsxAgcShortArray,i*shortSize,shortSize);
             }
             double[] nsxAgcDoubleArray = ByteUtils.convertShortArrayToDoubleArray(nsxAgcShortArray);
 
@@ -127,16 +164,55 @@ public class PytorchRepository {
                     }
                 }
             }
+            webRTCFree();
 
             //分贝数
             double decibels = AudioUtils.getAudioDb(audioAsFloatArray);
             AudioUtils.saveAudioClassifyWav(context,"audioClassifyNSX",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),nsxAgcDoubleArray);
 
             return audioClassifyResult;
-        }catch (Exception e){
+        } catch (Exception e){
             Log.e("TAG", "AudioClassify: "+e.getMessage() );
             throw new Exception(e);
         }
+    }
+
+    private void webRTCCreate() {
+        nsxInstList.clear();
+        for (int i = 0; i < nsxInstListNum; i++) {
+            long nsxInst = webRTCAudioUtils.nsxCreate();
+            webRTCAudioUtils.nsxInit(nsxInst, 16000);
+            webRTCAudioUtils.nsxSetPolicy(nsxInst, 2);
+            nsxInstList.add(nsxInst);
+        }
+
+        nsxInstList2.clear();
+        for (int i = 0; i < nsxInstList2Num; i++) {
+            long nsxInst2 = webRTCAudioUtils.nsxCreate();
+            webRTCAudioUtils.nsxInit(nsxInst2, 16000);
+            webRTCAudioUtils.nsxSetPolicy(nsxInst2, 2);
+            nsxInstList2.add(nsxInst2);
+        }
+
+        agcInstList.clear();
+        for (int i = 0; i < agcInstListNum; i++) {
+            long agcInst = webRTCAudioUtils.agcCreate();
+            webRTCAudioUtils.agcInit(agcInst, 0, 255, 2, 16000);
+            webRTCAudioUtils.agcSetConfig(agcInst, webRTCAudioUtils.getAgcConfig((short) 3, (short) 75, true));
+            agcInstList.add(agcInst);
+        }
+    }
+
+    private void webRTCFree() {
+        for (long nsxInst : nsxInstList) {
+            webRTCAudioUtils.nsxFree(nsxInst);
+        }
+        nsxInstList.clear();
+
+        for (long agcInst : agcInstList) {
+            webRTCAudioUtils.agcFree(agcInst);
+        }
+        agcInstList.clear();
     }
 
     /**

@@ -36,9 +36,9 @@ public class AssetsAudioClassify extends AppCompatActivity {
 
 
         try {
-            Module module = Module.load(assetFilePath(this, "fbank-model.pt"));
+//            Module module = Module.load(assetFilePath(this, "fbank-fbank-model20240219.pt"));
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss");//yyyy-MM-dd HH:mm:ss
 
 //            String fileName = "dogTest-0001.wav";
             String fileName = "023500.wav";
