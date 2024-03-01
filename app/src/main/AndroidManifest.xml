@@ -23,6 +23,9 @@
         android:theme="@style/Theme.NCNNDemo"
         tools:targetApi="31">
         <activity
+            android:name=".activity.FileNsxAgcActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.AppFileChosenActivity"
             android:exported="false" />
         <activity

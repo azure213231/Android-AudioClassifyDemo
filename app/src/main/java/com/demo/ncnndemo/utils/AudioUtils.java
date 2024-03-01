@@ -1,14 +1,17 @@
 package com.demo.ncnndemo.utils;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.Log;
 
 import com.demo.ncnndemo.data.SoundClassed;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,8 +19,10 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class AudioUtils {
     private static final String TAG = "AudioUtils";
@@ -209,6 +214,40 @@ public class AudioUtils {
 //        gainDb(samples,Math.min(maxGainDb, targetDb - rmsDb));
 //    }
 
+    public static ChunkWavFile readAndChunkWavFile(Context context, Uri fileUri, int chunkSize) throws IOException {
+        List<byte[]> byteChunks = new ArrayList<>();
+        ContentResolver contentResolver = context.getContentResolver();
+        InputStream inputStream = null;
+        Integer audioFormat = 1;
+
+        try {
+            inputStream = contentResolver.openInputStream(fileUri);
+            if (inputStream != null) {
+                DataInputStream dataInputStream = new DataInputStream(inputStream);
+                // 跳过WAV文件头，具体跳过的字节数取决于WAV文件格式
+                byte[] header = new byte[44];
+                dataInputStream.readFully(header);
+                audioFormat  = ByteUtils.getIntFromByte(header, 20, 2);    // 编码格式
+
+//                inputStream.skip(44); // 一般WAV文件头为44字节
+
+                byte[] buffer = new byte[chunkSize];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    if (bytesRead == chunkSize) {
+                        byteChunks.add(buffer.clone());
+                    }
+                }
+            }
+
+            return new ChunkWavFile(audioFormat,byteChunks);
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
+    }
+
 
     private static float bytesToFloat(byte[] bytes, int offset) {
         int value = 0;
@@ -253,6 +292,12 @@ public class AudioUtils {
                 }
             }
         }
+    }
+
+    public static void saveAudioWav(Context context,String fileName,double[] audioData){
+        String savePath = context.getExternalFilesDir(null).getAbsolutePath() + File.separator + fileName;
+        Log.e("TAG", "run: "+savePath );
+        AudioUtils.saveDoubleArrayAsWav(audioData,savePath);
     }
 
     private static void saveAudioClassifyWav(Context context,String fileName,String classify,double[] audioData){
@@ -404,5 +449,31 @@ public class AudioUtils {
                 (byteArray[offset + 2] & 0xFF) << 16 |
                 (byteArray[offset + 1] & 0xFF) << 8 |
                 (byteArray[offset] & 0xFF);
+    }
+
+    public static class ChunkWavFile{
+        public ChunkWavFile(Integer audioFormat, List<byte[]> byteChunks) {
+            this.audioFormat = audioFormat;
+            this.byteChunks = byteChunks;
+        }
+
+        private Integer audioFormat;
+        private List<byte[]> byteChunks;
+
+        public Integer getAudioFormat() {
+            return audioFormat;
+        }
+
+        public void setAudioFormat(Integer audioFormat) {
+            this.audioFormat = audioFormat;
+        }
+
+        public List<byte[]> getByteChunks() {
+            return byteChunks;
+        }
+
+        public void setByteChunks(List<byte[]> byteChunks) {
+            this.byteChunks = byteChunks;
+        }
     }
 }

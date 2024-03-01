@@ -83,6 +83,18 @@ public class MainActivity extends AppCompatActivity {
                 showAppFileActivity();
             }
         });
+
+        binding.fileNsxAgc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showFileNsxAgcActivity();
+            }
+        });
+    }
+
+    private void showFileNsxAgcActivity() {
+        Intent intent = new Intent(this, FileNsxAgcActivity.class);
+        startActivity(intent);
     }
 
     private void showAppFileActivity() {

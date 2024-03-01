@@ -60,6 +60,23 @@
         android:background="#EEE"/>
 
     <LinearLayout
+        android:id="@+id/file_nsx_agc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="批量降噪、自动增益"
+            android:textColor="@color/black"
+            android:textSize="18sp"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#EEE"/>
+
+    <LinearLayout
         android:id="@+id/open_app_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -209,6 +209,11 @@ public class PytorchRepository {
         }
         nsxInstList.clear();
 
+        for (long nsxInst : nsxInstList2) {
+            webRTCAudioUtils.nsxFree(nsxInst);
+        }
+        nsxInstList2.clear();
+
         for (long agcInst : agcInstList) {
             webRTCAudioUtils.agcFree(agcInst);
         }
