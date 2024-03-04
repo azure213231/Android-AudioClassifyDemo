@@ -145,6 +145,9 @@ public class FileNsxAgcActivity extends AppCompatActivity {
         isAudioNsxAgc = false;
     }
 
+    /**
+     * 降噪增益
+     * */
     private double[] audioNsxAgc(double[] doubles){
         //初始化webrtc降噪
         if (webRTCAudioUtils == null){

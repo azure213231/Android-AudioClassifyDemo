@@ -161,7 +161,7 @@ public class AudioClassifyService  extends Service {
                 System.arraycopy(buffer, 0, data, 0, readSize);
                 recordedDataList.add(data);
 
-                //如果距离上次分析超过3秒
+                //如果距离上次分析超过5秒
                 if (System.currentTimeMillis() - lastRecordTimeStamp > 5 * 1000){
 
                     // 合并从上次记录到现在录音数据

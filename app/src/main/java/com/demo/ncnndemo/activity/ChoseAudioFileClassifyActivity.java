@@ -1,5 +1,7 @@
 package com.demo.ncnndemo.activity;
 
+import static java.lang.Thread.sleep;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -40,6 +42,7 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
     private static final int CHUNK_SIZE = 300 * 1024; // 每个块的大小，320KB
     private static Integer audioFormat = 1;
     private Map<String, Integer> resultCountMap = new HashMap<>();
+    private boolean isAudioNsxAgc = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,24 +132,33 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
             @Override
             public void run() {
                 for (int i = 0; i < byteChunks.size(); i++){
-                    byte[] bytes = new byte[CHUNK_SIZE];
-                    System.arraycopy(byteChunks.get(i),0,bytes,0,CHUNK_SIZE);
-                    double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(bytes, audioFormat);
                     try {
+                        byte[] bytes = new byte[CHUNK_SIZE];
+                        System.arraycopy(byteChunks.get(i),0,bytes,0,CHUNK_SIZE);
+                        double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(bytes, audioFormat);
                         double decibels = AudioUtils.getAudioDb(doubles);
-                        //识别结果
-                        PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
-                        //统计结果
-                        StatisticalAudioClassifyResult(audioClassifyResult);
-                        //保存音频
-                        AudioUtils.saveAudioClassifyWav(getApplicationContext(),"PSGClassify/"+fileName,audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
-                        ThreadPool.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
-                                binding.dbResult.setText("dB: " + decibels);
+                        while (true){
+                            if (isAudioNsxAgc){
+                                sleep(50);
+                            } else {
+                                isAudioNsxAgc = true;
+                                //识别结果
+                                PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
+                                //统计结果
+                                StatisticalAudioClassifyResult(audioClassifyResult);
+                                //保存音频
+                                AudioUtils.saveAudioClassifyWav(getApplicationContext(),"PSGClassify/"+fileName,audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
+                                ThreadPool.runOnMainThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        binding.classifyResult.setText(audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
+                                        binding.dbResult.setText("dB: " + decibels);
+                                    }
+                                });
+                                isAudioNsxAgc = false;
+                                break;
                             }
-                        });
+                        }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

@@ -23,10 +23,10 @@ public class PytorchRepository {
     private static volatile PytorchRepository instance;
     private WebRTCAudioUtils webRTCAudioUtils;
     //降噪，然后增益，循环次数
-    private Integer agcAndNsxNum = 1;
-    private Integer agcInstListNum = 1;
+    private Integer agcAndNsxNum = 3;
+    private Integer agcInstListNum = 3;
     private static List<Long> agcInstList = new ArrayList<>();
-    private Integer nsxInstListNum = 1;
+    private Integer nsxInstListNum = 3;
     private static List<Long> nsxInstList = new ArrayList<>();
     //降噪后增益次数
     private Integer nsxInstList2Num = 1;
@@ -51,7 +51,7 @@ public class PytorchRepository {
 
     public boolean init(Context context) throws Exception{
         try {
-            module = Module.load(assetFilePath(context, "fbank-model20240228.pt"));
+            module = Module.load(assetFilePath(context, "fbank-model20240304.pt"));
             return true;
         } catch (Exception e){
             throw new Exception(e);
@@ -114,7 +114,7 @@ public class PytorchRepository {
             double[] nsxAgcDoubleArray = ByteUtils.convertShortArrayToDoubleArray(nsxAgcShortArray);
 
             //使用分贝数对音频归一化（包含增益）
-//            normalize(nsxAgcDoubleArray);
+            normalize(nsxAgcDoubleArray);
             double[][][] feature = FilterBankProcessor.getFeature(nsxAgcDoubleArray);
 
 //            double[][][] feature = FilterBankProcessor.getFeature(audioAsFloatArray);
