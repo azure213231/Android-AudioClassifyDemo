@@ -268,14 +268,14 @@ public class AudioUtils {
         if (classify.equals("snore")){
             if (decibels > 45){
                 //识别率90%以上按照识别结果保存
-                if (score > 0.95){
+                if (score > 0.98){
                     AudioUtils.saveAudioClassifyWav(context,fileName,classify,audioData);
                 }
             }
         } else if(classify.equals("dreamTalk")){
             if (decibels > 40){
                 //识别率90%以上按照识别结果保存
-                if (score > 0.95){
+                if (score > 0.98){
                     AudioUtils.saveAudioClassifyWav(context,fileName,classify,audioData);
                 }
             }

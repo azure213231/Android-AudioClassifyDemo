@@ -171,8 +171,7 @@ public class AudioClassifyService  extends Service {
 
                     // 合并从上次记录到现在录音数据
                     byte[] finalRecordedData = concatenateByteArrays(recordedDataList);
-//                    double[] doublesDb = AudioUtils.convert32IntPCMToDoubleArray(finalRecordedData);
-                    double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(finalRecordedData,1);
+//                                      double[] doublesDb = AudioUtils.convert32IntPCMToDoubleArray(finalRecordedData);
 
                     recordedDataList.clear();
                     lastRecordTimeStamp = System.currentTimeMillis();
@@ -187,6 +186,7 @@ public class AudioClassifyService  extends Service {
                                     } else {
                                         isAudioClassify = true;
 
+                                        double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(finalRecordedData,1);
                                         //分贝数
                                         double decibels = AudioUtils.getAudioDb(doubles);
                                         // 创建 DecimalFormat 对象，指定保留两位小数
