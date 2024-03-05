@@ -1,5 +1,7 @@
 package com.demo.ncnndemo.service;
 
+import static java.lang.Thread.sleep;
+
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -175,35 +177,42 @@ public class AudioClassifyService  extends Service {
                     recordedDataList.clear();
                     lastRecordTimeStamp = System.currentTimeMillis();
 
-                    if (!isAudioClassify){
-                        ThreadPool.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
+                    ThreadPool.runOnThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (true){
                                 try {
-                                    isAudioClassify = true;
+                                    if (isAudioClassify){
+                                        sleep(50);
+                                    } else {
+                                        isAudioClassify = true;
 
-                                    //分贝数
-                                    double decibels = AudioUtils.getAudioDb(doubles);
-                                    // 创建 DecimalFormat 对象，指定保留两位小数
-                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
-                                    // 格式化 double 类型的数值
-                                    String formattedNumber = decimalFormat.format(decibels);
-                                    sendBorderCast("decibelsResult","db: " + formattedNumber);
+                                        //分贝数
+                                        double decibels = AudioUtils.getAudioDb(doubles);
+                                        // 创建 DecimalFormat 对象，指定保留两位小数
+                                        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                                        // 格式化 double 类型的数值
+                                        String formattedNumber = decimalFormat.format(decibels);
 
-                                    PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
-                                    sendBorderCast("classifyResult",audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
+                                        PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
 
-                                    classifyNum++;
-                                    sendBorderCast("classifyNum",classifyNum.toString());
+                                        classifyNum++;
 
-                                    AudioUtils.saveAudioClassifyWav(getApplicationContext(),"audioClassify",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
+                                        AudioUtils.saveAudioClassifyWav(getApplicationContext(),"audioClassify",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
+
+                                        sendBorderCast("decibelsResult","db: " + formattedNumber);
+                                        sendBorderCast("classifyResult",audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
+                                        sendBorderCast("classifyNum",classifyNum.toString());
+                                        isAudioClassify = false;
+                                        break;
+                                    }
                                 } catch (Exception e) {
                                     ToastUtil.showToast(getApplicationContext(),"分析失败: " + e.getMessage());
                                 }
-                                isAudioClassify = false;
                             }
-                        });
-                    }
+                        }
+                    });
+
                 }
             }
         }
