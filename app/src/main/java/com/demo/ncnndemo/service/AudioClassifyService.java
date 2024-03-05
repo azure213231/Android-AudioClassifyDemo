@@ -42,6 +42,7 @@ public class AudioClassifyService  extends Service {
     private static final int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "YourChannelId";
     private Notification notification;
+    private Integer classifyNum = 0;
 
     @Override
     public void onCreate() {
@@ -134,8 +135,10 @@ public class AudioClassifyService  extends Service {
                 }
             });
 
+            classifyNum = 0;
             sendBorderCast("startRecord","GONE");
             sendBorderCast("stopRecord","VISIBLE");
+            sendBorderCast("classifyNum",classifyNum.toString());
         }
     }
 
@@ -189,6 +192,9 @@ public class AudioClassifyService  extends Service {
 
                                     PytorchRepository.AudioClassifyResult audioClassifyResult = PytorchRepository.getInstance().audioClassify(getApplicationContext(),doubles);
                                     sendBorderCast("classifyResult",audioClassifyResult.getLabel() + ": " + audioClassifyResult.getScore());
+
+                                    classifyNum++;
+                                    sendBorderCast("classifyNum",classifyNum.toString());
 
                                     AudioUtils.saveAudioClassifyWav(getApplicationContext(),"audioClassify",audioClassifyResult.getLabel(),decibels,audioClassifyResult.getScore(),doubles);
                                 } catch (Exception e) {

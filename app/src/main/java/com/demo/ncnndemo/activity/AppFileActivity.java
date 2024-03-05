@@ -57,6 +57,8 @@ public class AppFileActivity extends AppCompatActivity {
 
         });
         binding.recyclerView.setAdapter(folderAdapter);
+
+        binding.fileNum.setText("文件总数：" + folderList.size());
     }
 
     private void showAppFileActivity(File folder) {

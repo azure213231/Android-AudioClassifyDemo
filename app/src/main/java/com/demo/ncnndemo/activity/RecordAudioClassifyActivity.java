@@ -185,12 +185,8 @@ public class RecordAudioClassifyActivity extends AppCompatActivity {
                     binding.decibelsResult.setText(data);
                 } else if (name.equals("classifyResult")){
                     binding.classifyResult.setText(data);
-                } else if (name.equals("classifyResult")){
-                    binding.classifyResult.setText(data);
-                } else if (name.equals("classifyResult")){
-                    binding.classifyResult.setText(data);
-                } else if (name.equals("classifyResult")){
-                    binding.classifyResult.setText(data);
+                } else if (name.equals("classifyNum")){
+                    binding.classifyNum.setText("分析次数：" + data);
                 }
             }
         });
