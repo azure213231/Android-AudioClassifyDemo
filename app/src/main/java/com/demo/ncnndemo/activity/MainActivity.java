@@ -4,13 +4,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 
 import com.demo.ncnndemo.dialog.DefaultDialog;
 import com.demo.ncnndemo.utils.PermissionUtils;
 import com.demo.ncnndemo.repository.PytorchRepository;
+import com.demo.ncnndemo.utils.ThreadPool;
 import com.demo.ncnndemo.utils.ToastUtil;
 import com.demo.ncnndemo.databinding.ActivityMainBinding;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -90,6 +96,59 @@ public class MainActivity extends AppCompatActivity {
                 showFileNsxAgcActivity();
             }
         });
+
+        binding.fileClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showFileClearDialog();
+            }
+        });
+    }
+
+    private void showFileClearDialog() {
+        DefaultDialog defaultDialog = new DefaultDialog(this, "清除文件", "将清除保存的声音文件", new DefaultDialog.onClickListener() {
+            @Override
+            public void onConfirmCLick() {
+                fileClear();
+            }
+
+            @Override
+            public void onCancelCLick() {
+
+            }
+        });
+        defaultDialog.show();
+    }
+
+    private void fileClear() {
+        String absolutePath = getExternalFilesDir(null).getAbsolutePath();
+        List<String> filePathList = new ArrayList<>();
+        filePathList.add(absolutePath + "/audioClassifyNSX");
+        filePathList.add(absolutePath + "/audioClassify");
+        filePathList.add(absolutePath + "/PSGClassify");
+        filePathList.add(absolutePath + "/NsxAgcFiles");
+        for (String filePath : filePathList){
+            File folder = new File(filePath);
+            deleteFolder(folder);
+        }
+        ToastUtil.showToast(this,"清除成功", Gravity.CENTER);
+    }
+
+    public static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    // 递归删除子文件夹
+                    deleteFolder(file);
+                } else {
+                    // 删除文件
+                    file.delete();
+                }
+            }
+        }
+        // 删除空文件夹或者子文件夹后的空文件夹
+        folder.delete();
     }
 
     private void showFileNsxAgcActivity() {
