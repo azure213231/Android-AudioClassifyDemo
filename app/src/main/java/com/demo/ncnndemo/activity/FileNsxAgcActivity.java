@@ -36,10 +36,10 @@ public class FileNsxAgcActivity extends AppCompatActivity {
     private FolderAdapter folderAdapter;
     private List<File> folderList;
     private WebRTCAudioUtils webRTCAudioUtils;
-    private Integer agcAndNsxNum = 1;
-    private Integer agcInstListNum = 1;
+    private Integer agcAndNsxNum = 2;
+    private Integer agcInstListNum = 2;
     private static List<Long> agcInstList = new ArrayList<>();
-    private Integer nsxInstListNum = 1;
+    private Integer nsxInstListNum = 2;
     private static List<Long> nsxInstList = new ArrayList<>();
     private Integer CHUNK_SIZE = 300 * 1024;
     private boolean isAudioNsxAgc = false;
