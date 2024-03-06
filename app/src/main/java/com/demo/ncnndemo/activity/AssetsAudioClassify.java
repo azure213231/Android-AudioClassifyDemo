@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import com.demo.ncnndemo.utils.AudioUtils;
-import com.demo.ncnndemo.utils.NCNNUtils;
 import com.demo.ncnndemo.repository.PytorchRepository;
 import com.demo.ncnndemo.databinding.ActivityAssetsAudioClassfyBinding;
 
@@ -32,7 +31,7 @@ public class AssetsAudioClassify extends AppCompatActivity {
 
         // Example of a call to a native method
         TextView tv = binding.sampleText;
-        tv.setText(NCNNUtils.stringFromJNI());
+//        tv.setText(NCNNUtils.stringFromJNI());
 
 
         try {

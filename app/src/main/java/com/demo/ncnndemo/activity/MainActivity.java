@@ -3,6 +3,8 @@ package com.demo.ncnndemo.activity;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -21,11 +23,11 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'ncnndemo' library on application startup.
-    static {
-        System.loadLibrary("ncnndemo");
-    }
+//    static {
+//        System.loadLibrary("ncnndemo");
+//    }
 
-    private Integer SIZE = 40;
+//    private Integer SIZE = 40;
 
     private ActivityMainBinding binding;
 
@@ -103,6 +105,15 @@ public class MainActivity extends AppCompatActivity {
                 showFileClearDialog();
             }
         });
+
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String versionName = packageInfo.versionName;
+            binding.appVersion.setText("版本信息：" + versionName);
+            // 现在你可以使用versionName来做任何你需要的事情，比如显示在UI上或者打印出来。
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void showFileClearDialog() {

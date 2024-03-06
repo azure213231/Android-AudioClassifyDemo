@@ -14,21 +14,21 @@ project("ncnndemo")
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-set(ncnn_DIR ${CMAKE_SOURCE_DIR}/ncnn-20230816-android-vulkan/${ANDROID_ABI}/lib/cmake/ncnn)
-find_package(ncnn REQUIRED)
+#set(ncnn_DIR ${CMAKE_SOURCE_DIR}/ncnn-20230816-android-vulkan/${ANDROID_ABI}/lib/cmake/ncnn)
+#find_package(ncnn REQUIRED)
 
 set(libs_DIR libs/${ANDROID_ABI})
 include_directories(${libs_include_DIR})
 link_directories(${libs_DIR})
 
-add_library( # Sets the name of the library.
-        ncnndemo
-
-        # Sets the library as a shared library.
-        SHARED
-
-        # Provides a relative path to your source file(s).
-        native-lib.cpp)
+#add_library( # Sets the name of the library.
+#        ncnndemo
+#
+#        # Sets the library as a shared library.
+#        SHARED
+#
+#        # Provides a relative path to your source file(s).
+#        native-lib.cpp)
 
 add_library( # Sets the name of the library.
         webrtc-lib
@@ -94,13 +94,13 @@ find_library( # Sets the name of the path variable.
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
-target_link_libraries( # Specifies the target library.
-        ncnndemo
+#target_link_libraries( # Specifies the target library.
+#        ncnndemo
 
-        ncnn
+#        ncnn
 
-        jnigraphics
+#        jnigraphics
 
         # Links the target library to the log library
         # included in the NDK.
-        ${log-lib})
+#        ${log-lib})

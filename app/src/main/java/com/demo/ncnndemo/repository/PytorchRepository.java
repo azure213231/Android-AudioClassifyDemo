@@ -23,10 +23,10 @@ public class PytorchRepository {
     private static volatile PytorchRepository instance;
     private WebRTCAudioUtils webRTCAudioUtils;
     //降噪，然后增益，循环次数
-    private Integer agcAndNsxNum = 4;
-    private Integer agcInstListNum = 4;
+    private Integer agcAndNsxNum = 5;
+    private Integer agcInstListNum = 5;
     private static List<Long> agcInstList = new ArrayList<>();
-    private Integer nsxInstListNum = 4;
+    private Integer nsxInstListNum = 5;
     private static List<Long> nsxInstList = new ArrayList<>();
     //降噪后增益次数
     private Integer nsxInstList2Num = 1;
@@ -51,7 +51,7 @@ public class PytorchRepository {
 
     public boolean init(Context context) throws Exception{
         try {
-            module = Module.load(assetFilePath(context, "fbank-model20240304-2.pt"));
+            module = Module.load(assetFilePath(context, "model20240306-2.pt"));
             return true;
         } catch (Exception e){
             throw new Exception(e);
