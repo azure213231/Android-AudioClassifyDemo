@@ -51,7 +51,7 @@ public class PytorchRepository {
 
     public boolean init(Context context) throws Exception{
         try {
-            module = Module.load(assetFilePath(context, "model20240306-2.pt"));
+            module = Module.load(assetFilePath(context, "model20240307.pt"));
             return true;
         } catch (Exception e){
             throw new Exception(e);

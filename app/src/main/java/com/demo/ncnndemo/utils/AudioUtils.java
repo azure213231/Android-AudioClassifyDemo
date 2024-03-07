@@ -266,7 +266,7 @@ public class AudioUtils {
 //            return;
 //        }
         if (classify.equals("snore")){
-            if (decibels > 45){
+            if (decibels > 42){
                 //识别率90%以上按照识别结果保存
                 if (score > 0.95){
                     AudioUtils.saveAudioClassifyWav(context,fileName,classify,audioData);
