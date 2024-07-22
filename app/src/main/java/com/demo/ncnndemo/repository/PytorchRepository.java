@@ -29,7 +29,7 @@ public class PytorchRepository {
     private Integer nsxInstListNum = 5;
     private static List<Long> nsxInstList = new ArrayList<>();
     //降噪后增益次数
-    private Integer nsxInstList2Num = 1;
+    private Integer nsxInstList2Num = 0;
     private static List<Long> nsxInstList2 = new ArrayList<>();
     private PytorchRepository() {
     }
@@ -51,7 +51,7 @@ public class PytorchRepository {
 
     public boolean init(Context context) throws Exception{
         try {
-            module = Module.load(assetFilePath(context, "model20240307.pt"));
+            module = Module.load(assetFilePath(context, "model20240719-5.pt"));
             return true;
         } catch (Exception e){
             throw new Exception(e);

@@ -9,8 +9,13 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.media.audiofx.AudioEffect;
+import android.media.audiofx.AutomaticGainControl;
+import android.media.audiofx.EnvironmentalReverb;
+import android.media.audiofx.NoiseSuppressor;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -123,6 +128,26 @@ public class AudioClassifyService  extends Service {
                 AUDIO_FORMAT,
                 BUFFER_SIZE
         );
+
+        if (NoiseSuppressor.isAvailable()) {
+            NoiseSuppressor noiseSuppressor = NoiseSuppressor.create(audioRecord.getAudioSessionId());
+            if (noiseSuppressor != null) {
+                noiseSuppressor.setEnabled(true); // 启用噪声抑制
+            } else {
+                Log.e(TAG, "NoiseSuppressor is not supported or could not be created");
+            }
+        }
+
+        if (AutomaticGainControl.isAvailable()) {
+            AutomaticGainControl agc = AutomaticGainControl.create(audioRecord.getAudioSessionId());
+            if (agc != null) {
+                agc.setEnabled(true); // 启用AGC
+            } else {
+                Log.e(TAG, "AutomaticGainControl is not supported or could not be created");
+            }
+        }
+
+
         if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
 
             lastRecordTimeStamp = System.currentTimeMillis();
