@@ -40,34 +40,34 @@ public class ToastUtil extends Toast{
         showToast(context, context.getString(resId), gravity, offX, offY);
     }
 
-    public static void showToast(Context context, String s) {
-        if (TextUtils.isEmpty(s)){
+    public static void showToast(Context context, String message) {
+        if (TextUtils.isEmpty(message)) {
             return;
         }
+
+        // 如果没有Toast实例，创建一个新的
         if (toast == null) {
-            toast = new Toast(context);
-            toast.setText(s);
-            toast.setDuration(Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER,0,0);
+            toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
             oneTime = System.currentTimeMillis();
         } else {
-            twoTime = System.currentTimeMillis();
-            if (s.equals(oldMsg)) {
+            long twoTime = System.currentTimeMillis();
+            // 如果是相同的消息
+            if (message.equals(oldMsg)) {
+                // 只有在间隔大于一定时间时才显示
                 if (twoTime - oneTime > Toast.LENGTH_SHORT) {
                     toast.show();
                 }
             } else {
-                oldMsg = s;
-//                toast.setText(s);
-//                toast.show();
-                toast.cancel();
-                toast = Toast.makeText(context, s, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER,0,0);
+                // 更新消息
+                oldMsg = message;
+                // 使用新的消息创建Toast
+                toast.setText(message);  // 直接设置文本而不重新创建Toast
                 toast.show();
             }
         }
-        oneTime = twoTime;
+        oneTime = System.currentTimeMillis();
     }
 
 

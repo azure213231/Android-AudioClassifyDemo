@@ -82,7 +82,9 @@ public class AudioUtils {
             double[] doubles = new double[0];
             if (audioFormat == 1){
                 doubles = convert32IntPCMToDoubleArray(audioPcmData);
-            } else if (audioFormat == 3){
+            } else if (audioFormat == 2){
+                doubles = convert16IntPCMToDoubleArray(audioPcmData);
+            }  else if (audioFormat == 3){
                 doubles = convert32FloatPCMToDoubleArray(audioPcmData);
             }
 
@@ -90,6 +92,27 @@ public class AudioUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 16位整型编码格式的byte[]转化为double[]
+     * */
+    private static double[] convert16IntPCMToDoubleArray(byte[] pcmBytes) {
+        int numSamples = pcmBytes.length / 2; // Assuming 16-bit PCM (2 bytes per sample)
+        double[] pcmDoubles = new double[numSamples];
+
+        ByteBuffer buffer = ByteBuffer.wrap(pcmBytes);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+        // 循环遍历每个采样点
+        for (int i = 0; i < numSamples; i++) {
+            // 将两个字节的数据合并成一个short类型的整数
+            short sample = (short) ((pcmBytes[2 * i + 1] << 8) | (pcmBytes[2 * i] & 0xFF));
+            // 将short类型的整数转换为double类型的浮点数
+            pcmDoubles[i] = sample / 32768.0; // 32768.0 是 2^15，用于归一化到 [-1.0, 1.0] 范围内
+        }
+
+        return pcmDoubles;
     }
 
     /**

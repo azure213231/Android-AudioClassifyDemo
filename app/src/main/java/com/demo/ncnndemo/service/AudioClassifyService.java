@@ -44,7 +44,7 @@ public class AudioClassifyService  extends Service {
     private PowerManager.WakeLock wakeLock;
     private static final int SAMPLE_RATE = 16000;
     private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
-    private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_32BIT;
+    private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
     private static final int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "YourChannelId";
@@ -211,7 +211,7 @@ public class AudioClassifyService  extends Service {
                                     } else {
                                         isAudioClassify = true;
 
-                                        double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(finalRecordedData,1);
+                                        double[] doubles = AudioUtils.pcmAudioByteArray2DoubleArray(finalRecordedData,AUDIO_FORMAT);
                                         //分贝数
                                         double decibels = AudioUtils.getAudioDb(doubles);
                                         // 创建 DecimalFormat 对象，指定保留两位小数
