@@ -6,7 +6,7 @@
 
 本项目模型由Pytorch训练，模型识别主要包含以下声音分类项bird,chicken,cough,dream_talk,footstep,knock_door,snore,thunderstorm,whistle,wind，项目还提供webRTC降噪与自动增益算法、实时录音分类、大型音频文件截取分类等功能，可以用于广泛的场景，为此提供示例帮助技术的发展与应用。
 
-<img src="C:\Users\HuangMinglun\AppData\Roaming\Typora\typora-user-images\image-20241030102804246.png" alt="image-20241030102804246" style="zoom: 50%;" />
+<img src="D:\Code\client\Android\sleep-baby-audio-classify\readme-res\img\image-20241030092110342.png" alt="image-20241030102804246" style="zoom: 50%;" />
 
 
 
