@@ -10,6 +10,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.AudioFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
@@ -40,7 +41,7 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
     private static final int REQUEST_APP_FILE_CODE = 1;  // 用于标识请求的常量
     private static final int HEADER_SIZE = 44; // WAV文件头部大小
     private static final int CHUNK_SIZE = 300 * 1024; // 每个块的大小，320KB
-    private static Integer audioFormat = 1;
+    private static Integer audioFormat = AudioFormat.ENCODING_PCM_32BIT;
     private Map<String, Integer> resultCountMap = new HashMap<>();
     private boolean isAudioNsxAgc = false;
 
@@ -233,7 +234,12 @@ public class ChoseAudioFileClassifyActivity extends AppCompatActivity {
                 DataInputStream dataInputStream = new DataInputStream(inputStream);
                 byte[] header = new byte[44];
                 dataInputStream.readFully(header);
-                audioFormat  = ByteUtils.getIntFromByte(header, 20, 2);    // 编码格式
+                Integer audioFormatInt = ByteUtils.getIntFromByte(header, 20, 2);
+                if (audioFormatInt == 1){
+                    audioFormat = AudioFormat.ENCODING_PCM_32BIT;
+                } else if (audioFormatInt == 2) {
+                    audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+                }
 
                 // 跳过WAV文件头，具体跳过的字节数取决于WAV文件格式
 //                inputStream.skip(44); // 一般WAV文件头为44字节

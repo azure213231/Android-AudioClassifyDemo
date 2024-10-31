@@ -80,9 +80,9 @@ public class AudioUtils {
     public static double[] pcmAudioByteArray2DoubleArray(byte[] audioPcmData,int audioFormat) {
         try {
             double[] doubles = new double[0];
-            if (audioFormat == 1){
+            if (audioFormat == AudioFormat.ENCODING_PCM_32BIT){
                 doubles = convert32IntPCMToDoubleArray(audioPcmData);
-            } else if (audioFormat == 2){
+            } else if (audioFormat == AudioFormat.ENCODING_PCM_16BIT){
                 doubles = convert16IntPCMToDoubleArray(audioPcmData);
             }  else if (audioFormat == 3){
                 doubles = convert32FloatPCMToDoubleArray(audioPcmData);

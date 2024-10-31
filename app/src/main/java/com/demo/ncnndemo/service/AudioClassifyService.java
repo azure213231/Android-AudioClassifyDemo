@@ -44,8 +44,8 @@ public class AudioClassifyService  extends Service {
     private PowerManager.WakeLock wakeLock;
     private static final int SAMPLE_RATE = 16000;
     private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
-    private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
-    private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+    private static int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_32BIT;
+    private static int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
     private static final int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "YourChannelId";
     private Notification notification;
@@ -121,6 +121,14 @@ public class AudioClassifyService  extends Service {
 
     @SuppressLint("MissingPermission")
     private void startRecording() {
+        if (BUFFER_SIZE < 0) {
+            // 处理错误，例如输出日志或使用其他采样率/格式
+            Log.e("AudioRecord", "Invalid buffer size: " + BUFFER_SIZE);
+
+            AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+            BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+        }
+
         audioRecord = new AudioRecord(
                 MediaRecorder.AudioSource.MIC,
                 SAMPLE_RATE,
@@ -232,6 +240,7 @@ public class AudioClassifyService  extends Service {
                                         break;
                                     }
                                 } catch (Exception e) {
+                                    Log.e(TAG, "分析失败: " + e.getMessage());
                                     ToastUtil.showToast(getApplicationContext(),"分析失败: " + e.getMessage());
                                 }
                             }
