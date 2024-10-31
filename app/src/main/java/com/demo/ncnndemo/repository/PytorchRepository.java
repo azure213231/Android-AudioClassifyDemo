@@ -23,10 +23,10 @@ public class PytorchRepository {
     private static volatile PytorchRepository instance;
     private WebRTCAudioUtils webRTCAudioUtils;
     //降噪，然后增益，循环次数
-    private Integer agcAndNsxNum = 5;
-    private Integer agcInstListNum = 5;
+    private Integer agcAndNsxNum = 2;
+    private Integer agcInstListNum = 2;
     private static List<Long> agcInstList = new ArrayList<>();
-    private Integer nsxInstListNum = 5;
+    private Integer nsxInstListNum = 2;
     private static List<Long> nsxInstList = new ArrayList<>();
     //降噪后增益次数
     private Integer nsxInstList2Num = 0;
