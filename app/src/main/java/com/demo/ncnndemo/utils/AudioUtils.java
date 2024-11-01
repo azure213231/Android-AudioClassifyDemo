@@ -241,7 +241,7 @@ public class AudioUtils {
         List<byte[]> byteChunks = new ArrayList<>();
         ContentResolver contentResolver = context.getContentResolver();
         InputStream inputStream = null;
-        Integer audioFormat = 1;
+        Integer audioFormat = AudioFormat.ENCODING_PCM_32BIT;
 
         try {
             inputStream = contentResolver.openInputStream(fileUri);
@@ -250,7 +250,12 @@ public class AudioUtils {
                 // 跳过WAV文件头，具体跳过的字节数取决于WAV文件格式
                 byte[] header = new byte[44];
                 dataInputStream.readFully(header);
-                audioFormat  = ByteUtils.getIntFromByte(header, 20, 2);    // 编码格式
+                Integer audioFormatInt  = ByteUtils.getIntFromByte(header, 20, 2);    // 编码格式
+                if (audioFormatInt == 1){
+                    audioFormat = AudioFormat.ENCODING_PCM_32BIT;
+                } else if (audioFormatInt == 3){
+                    audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+                }
 
 //                inputStream.skip(44); // 一般WAV文件头为44字节
 
